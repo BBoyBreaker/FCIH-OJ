@@ -1,0 +1,68 @@
+﻿@model FCIH_OJ.Models.contest
+
+@{
+    ViewBag.Title = "Create";
+}
+<script src="~/Assets/js/jquery-3.1.1.js"></script>
+<script src="~/Assets/js/jquery.unobtrusive-ajax.min.js"></script>
+<script>
+    function afterInitializing() {
+        $("#addProblemsOrUpdateContest").fadeIn();
+    }
+</script>
+<h2>Create</h2>
+
+@using (Html.BeginForm()) {
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>contest</legend>
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Name)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.Name)
+            @Html.ValidationMessageFor(model => model.Name)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.date)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.date)
+            @Html.ValidationMessageFor(model => model.date)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.numOfProblems)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.numOfProblems)
+            @Html.ValidationMessageFor(model => model.numOfProblems)
+        </div>
+
+      
+        <div id="addProblemsOrUpdateContest" style="display:none;">
+            contest has been initialized successefully <br>
+            <p> number of Problems Left </p>
+            @Html.ActionLink("Add a problem to this contest", "create", "problem", new { contestId= ViewBag.contestId }, new { target = "_new" })
+        </div>
+        <p>
+            <input type="submit" value="Create" />
+        </p>
+    </fieldset>
+}
+@if (Request.HttpMethod == "POST")
+{
+    if (Model.Id != 0)
+    {   //this would equal 0 in case you did not fill the fileds of the contest properly
+        <script>
+            afterInitializing();
+        </script>
+    }
+}
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+

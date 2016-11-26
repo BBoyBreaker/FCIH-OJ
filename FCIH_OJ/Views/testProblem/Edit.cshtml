@@ -1,0 +1,62 @@
+﻿@model FCIH_OJ.Models.contestAndProblem.problem
+
+@{
+    ViewBag.Title = "Edit";
+}
+
+<h2>Edit</h2>
+
+@using (Html.BeginForm()) {
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>problem</legend>
+
+        @Html.HiddenFor(model => model.Id)
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.name)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.name)
+            @Html.ValidationMessageFor(model => model.name)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.problemDifficultyId, "ProblemDifficulty")
+        </div>
+        <div class="editor-field">
+            @Html.DropDownList("problemDifficultyId", String.Empty)
+            @Html.ValidationMessageFor(model => model.problemDifficultyId)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.problemTypeId, "ProblemType")
+        </div>
+        <div class="editor-field">
+            @Html.DropDownList("problemTypeId", String.Empty)
+            @Html.ValidationMessageFor(model => model.problemTypeId)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.contestId, "Contest")
+        </div>
+        <div class="editor-field">
+            @Html.DropDownList("contestId", String.Empty)
+            @Html.ValidationMessageFor(model => model.contestId)
+        </div>
+
+        <p>
+            <input type="submit" value="Save" />
+        </p>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

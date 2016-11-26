@@ -1,0 +1,87 @@
+﻿@model FCIH_OJ.Models.contestAndProblem.problem
+
+@{
+    ViewBag.Title = "Create";
+}
+<script src="~/Assets/js/jquery-3.1.1.js"></script>
+<script src="~/Assets/js/jquery.unobtrusive-ajax.min.js"></script>
+<h2>Create</h2>
+@ViewData.GetViewDataInfo("contestId")
+@using (Html.BeginForm()) {
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    //int temp = ViewBag.contestId;  attempt1 also in problemController
+    //string str = temp.ToString();
+    //Html.ValueFor(m => m.contestId,str);
+    
+    <fieldset>
+        <legend>problem</legend>
+        <div class="editor-label">
+            @Html.LabelFor(model => model.name)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.name)
+            @Html.ValidationMessageFor(model => model.name)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.problemDifficultyId, "ProblemDifficulty")
+        </div>
+        <div class="editor-field">
+            @Html.DropDownList("problemDifficultyId", String.Empty)
+            @Html.ValidationMessageFor(model => model.problemDifficultyId)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.problemTypeId, "ProblemType")
+        </div>
+        <div class="editor-field">
+            @Html.DropDownList("problemTypeId", String.Empty)
+            @Html.ValidationMessageFor(model => model.problemTypeId)
+        </div>
+
+
+     <label> Number Of TestCases</label>
+     <input type="number" id="numOfTestCases" />        
+      <button type="button" id="addTestCases"> Add TestCases </button>
+        
+        <div id="testCases">
+          @*>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> testcases*@ 
+        </div>
+
+
+       <p>
+            <h2> @ViewData["textAfterCreation"]</h2>
+            <input type="submit" value="@ViewData["submit"]" name="submit"/>
+        </p>
+    </fieldset>
+}
+
+<script>
+
+    $("#addTestCases").click(function () {
+        numOfTestCases = $("#numOfTestCases").val();
+        OldTestCases = $("#testCases #testCase");
+        numOfOldTestCases = OldTestCases.length ;
+
+        for (k = numOfOldTestCases ; k > numOfTestCases ; k--) 
+            $("#testCases #testCase").last().remove();
+        // OldTestCases.last().remove();  you can not so this becasue it would remove the same last element evrytime
+
+        for (k = numOfOldTestCases  ; k < numOfTestCases ; k++) {
+            tempK = k + 1;
+            $("#testCases").html($("#testCases").html() + ' <div id="testCase">' +
+         '<label for="TestCases_' + k + '__input">input' + tempK + '</label>' +
+         '<input class="text-box single-line" id="TestCases_+' + k + '__input" name="TestCases[' + k + '].input" type="text" value="" />' +
+
+         '<label for="TestCases_' + k + '__output">output' + tempK1 + '</label>' +
+         '<input class="text-box single-line" id="TestCases_' + k + '__output" name="TestCases[' + k + '].output" type="text" value="" />' +
+         '</div>');
+        }
+    });
+</script>
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>

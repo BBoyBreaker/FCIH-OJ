@@ -1,0 +1,72 @@
+﻿@model FCIH_OJ.Models.contestAndProblem.problem
+
+@{
+    ViewBag.Title = "Edit";
+}
+<script src="~/Assets/js/jquery-3.1.1.js"></script>
+<script src="~/Assets/js/jquery.unobtrusive-ajax.min.js"></script>
+<h2>Edit</h2>
+
+@using (Html.BeginForm()) {
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>problem</legend>
+
+        @Html.HiddenFor(model => model.Id)
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.name)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.name)
+            @Html.ValidationMessageFor(model => model.name)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.problemDifficultyId, "ProblemDifficulty")
+        </div>
+        <div class="editor-field">
+            @Html.DropDownList("problemDifficultyId", String.Empty)
+            @Html.ValidationMessageFor(model => model.problemDifficultyId)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.problemTypeId, "ProblemType")
+        </div>
+        <div class="editor-field">
+            @Html.DropDownList("problemTypeId", String.Empty)
+            @Html.ValidationMessageFor(model => model.problemTypeId)
+        </div>
+        <p>
+            <input type="submit" value="Save" />
+        </p>
+    </fieldset>
+}
+<input type="hidden" id="problemId" value="@Model.Id" />
+        <h4>TestCases
+            <button onclick="AddnewTestCase()"> Add new TestCase </button>
+        </h4>
+
+       <table>
+               <tr id="firstRow"> 
+                    <td>
+                        @Html.Label("input")  
+                   </td>
+                   <td>
+                      @Html.Label("output")
+                   </td>
+                </tr>
+
+                 @foreach (FCIH_OJ.Models.contestAndProblem.testCase item in Model.TestCases)
+                  {
+                        @Html.Partial("_editTestCase", item)
+                  }
+         </table>
+
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+

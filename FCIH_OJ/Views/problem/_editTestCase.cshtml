@@ -1,0 +1,39 @@
+﻿@model FCIH_OJ.Models.contestAndProblem.testCase
+
+    @*<script src="~/Assets/js/jquery-3.1.1.js"></script>
+    <script src="~/Assets/js/jquery.unobtrusive-ajax.min.js"></script>
+    you do not include them here because you include jquery.unobtrusive-ajax.min.js in the parent view of this partial and if you include this liberary twice in the same layout so it would execute the ajax functions twice*@
+
+                    <tr>
+                         @using (Ajax.BeginForm("saveTestCaseChanges", "problem", new {id=Model.Id }, new AjaxOptions { HttpMethod = "Get" }))
+                         {
+                                <td>
+                                    @Html.EditorFor(model => model.input)
+                                </td>
+                                <td>
+                                    @Html.EditorFor(model => model.output)
+                                </td>
+                                <td>
+                                    <input type="submit" value="Save Changes" />
+                                </td>
+                         }
+                        
+                        <td>
+                            @using (Ajax.BeginForm("deleteTestCase", "problem", new { id = Model.Id }, new AjaxOptions { HttpMethod = "Get" }))
+                            {
+                                <input type="submit" value="delete" class="delete" />
+                            }
+                         </td>
+                        <td> @Html.ValidationMessageFor(model => model.output)</td>
+                        <td> @Html.ValidationMessageFor(model => model.input) </td>
+                      </tr>
+                       
+                           
+                       
+<script>
+
+    $(".delete").click(function () {
+        $(this).parent().parent().parent().hide();
+    });
+    
+</script>

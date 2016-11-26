@@ -1,0 +1,43 @@
+﻿@model FCIH_OJ.Models.contestAndProblem.problem
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<fieldset>
+    <legend>problem</legend>
+
+    <div class="display-label">
+         @Html.DisplayNameFor(model => model.name)
+    </div>
+    <div class="display-field">
+        @Html.DisplayFor(model => model.name)
+    </div>
+
+    <div class="display-label">
+         @Html.DisplayNameFor(model => model.ProblemDifficulty.difficultyLetter)
+    </div>
+    <div class="display-field">
+        @Html.DisplayFor(model => model.ProblemDifficulty.difficultyLetter)
+    </div>
+
+    <div class="display-label">
+         @Html.DisplayNameFor(model => model.ProblemType.type)
+    </div>
+    <div class="display-field">
+        @Html.DisplayFor(model => model.ProblemType.type)
+    </div>
+
+    <div class="display-label">
+         @Html.DisplayNameFor(model => model.Contest.Name)
+    </div>
+    <div class="display-field">
+        @Html.DisplayFor(model => model.Contest.Name)
+    </div>
+</fieldset>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id=Model.Id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

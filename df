@@ -1,0 +1,1964 @@
+[1mdiff --git a/.gitignore b/.gitignore[m
+[1mindex 0ca27f0..27afb88 100755[m
+[1m--- a/.gitignore[m
+[1m+++ b/.gitignore[m
+[36m@@ -196,7 +196,6 @@[m [mUpgradeLog*.XML[m
+ UpgradeLog*.htm[m
+ [m
+ # SQL Server files[m
+[31m-*.mdf[m
+ *.ldf[m
+ [m
+ # Business Intelligence projects[m
+[1mdiff --git a/.nuget/NuGet.Config b/.nuget/NuGet.Config[m
+[1mnew file mode 100644[m
+[1mindex 0000000..67f8ea0[m
+[1m--- /dev/null[m
+[1m+++ b/.nuget/NuGet.Config[m
+[36m@@ -0,0 +1,6 @@[m
+[32m+[m[32m﻿<?xml version="1.0" encoding="utf-8"?>[m
+[32m+[m[32m<configuration>[m
+[32m+[m[32m  <solution>[m
+[32m+[m[32m    <add key="disableSourceControlIntegration" value="true" />[m
+[32m+[m[32m  </solution>[m
+[32m+[m[32m</configuration>[m
+\ No newline at end of file[m
+[1mdiff --git a/.nuget/NuGet.exe b/.nuget/NuGet.exe[m
+[1mnew file mode 100644[m
+[1mindex 0000000..6bb79fe[m
+Binary files /dev/null and b/.nuget/NuGet.exe differ
+[1mdiff --git a/.nuget/NuGet.targets b/.nuget/NuGet.targets[m
+[1mnew file mode 100644[m
+[1mindex 0000000..3f8c37b[m
+[1m--- /dev/null[m
+[1m+++ b/.nuget/NuGet.targets[m
+[36m@@ -0,0 +1,144 @@[m
+[32m+[m[32m<?xml version="1.0" encoding="utf-8"?>[m
+[32m+[m[32m<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">[m
+[32m+[m[32m    <PropertyGroup>[m
+[32m+[m[32m        <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">$(MSBuildProjectDirectory)\..\</SolutionDir>[m
+[32m+[m
+[32m+[m[32m        <!-- Enable the restore command to run before builds -->[m
+[32m+[m[32m        <RestorePackages Condition="  '$(RestorePackages)' == '' ">false</RestorePackages>[m
+[32m+[m
+[32m+[m[32m        <!-- Property that enables building a package from a project -->[m
+[32m+[m[32m        <BuildPackage Condition=" '$(BuildPackage)' == '' ">false</BuildPackage>[m
+[32m+[m
+[32m+[m[32m        <!-- Determines if package restore consent is required to restore packages -->[m
+[32m+[m[32m        <RequireRestoreConsent Condition=" '$(RequireRestoreConsent)' != 'false' ">true</RequireRestoreConsent>[m
+[32m+[m
+[32m+[m[32m        <!-- Download NuGet.exe if it does not already exist -->[m
+[32m+[m[32m        <DownloadNuGetExe Condition=" '$(DownloadNuGetExe)' == '' ">false</DownloadNuGetExe>[m
+[32m+[m[32m    </PropertyGroup>[m
+[32m+[m
+[32m+[m[32m    <ItemGroup Condition=" '$(PackageSources)' == '' ">[m
+[32m+[m[32m        <!-- Package sources used to restore packages. By default, registered sources under %APPDATA%\NuGet\NuGet.Config will be used -->[m
+[32m+[m[32m        <!-- The official NuGet package source (https://www.nuget.org/api/v2/) will be excluded if package sources are specified and it does not appear in the list -->[m
+[32m+[m[32m        <!--[m
+[32m+[m[32m            <PackageSource Include="https://www.nuget.org/api/v2/" />[m
+[32m+[m[32m            <PackageSource Include="https://my-nuget-source/nuget/" />[m
+[32m+[m[32m        -->[m
+[32m+[m[32m    </ItemGroup>[m
+[32m+[m
+[32m+[m[32m    <PropertyGroup Condition=" '$(OS)' == 'Windows_NT'">[m
+[32m+[m[32m        <!-- Windows specific commands -->[m
+[32m+[m[32m        <NuGetToolsPath>$([System.IO.Path]::Combine($(SolutionDir), ".nuget"))</NuGetToolsPath>[m
+[32m+[m[32m    </PropertyGroup>[m
+[32m+[m
+[32m+[m[32m    <PropertyGroup Condition=" '$(OS)' != 'Windows_NT'">[m
+[32m+[m[32m        <!-- We need to launch nuget.exe with the mono command if we're not on windows -->[m
+[32m+[m[32m        <NuGetToolsPath>$(SolutionDir).nuget</NuGetToolsPath>[m
+[32m+[m[32m    </PropertyGroup>[m
+[32m+[m
+[32m+[m[32m    <PropertyGroup>[m
+[32m+[m[32m        <PackagesProjectConfig Condition=" '$(OS)' == 'Windows_NT'">$(MSBuildProjectDirectory)\packages.$(MSBuildProjectName.Replace(' ', '_')).config</PackagesProjectConfig>[m
+[32m+[m[32m        <PackagesProjectConfig Condition=" '$(OS)' != 'Windows_NT'">$(MSBuildProjectDirectory)\packages.$(MSBuildProjectName).config</PackagesProjectConfig>[m
+[32m+[m[32m    </PropertyGroup>[m
+[32m+[m
+[32m+[m[32m    <PropertyGroup>[m
+[32m+[m[32m      <PackagesConfig Condition="Exists('$(MSBuildProjectDirectory)\packages.config')">$(MSBuildProjectDirectory)\packages.config</PackagesConfig>[m
+[32m+[m[32m      <PackagesConfig Condition="Exists('$(PackagesProjectConfig)')">$(PackagesProjectConfig)</PackagesConfig>[m
+[32m+[m[32m    </PropertyGroup>[m
+[32m+[m[41m    [m
+[32m+[m[32m    <PropertyGroup>[m
+[32m+[m[32m        <!-- NuGet command -->[m
+[32m+[m[32m        <NuGetExePath Condition=" '$(NuGetExePath)' == '' ">$(NuGetToolsPath)\NuGet.exe</NuGetExePath>[m
+[32m+[m[32m        <PackageSources Condition=" $(PackageSources) == '' ">@(PackageSource)</PackageSources>[m
+[32m+[m
+[32m+[m[32m        <NuGetCommand Condition=" '$(OS)' == 'Windows_NT'">"$(NuGetExePath)"</NuGetCommand>[m
+[32m+[m[32m        <NuGetCommand Condition=" '$(OS)' != 'Windows_NT' ">mono --runtime=v4.0.30319 "$(NuGetExePath)"</NuGetCommand>[m
+[32m+[m
+[32m+[m[32m        <PackageOutputDir Condition="$(PackageOutputDir) == ''">$(TargetDir.Trim('\\'))</PackageOutputDir>[m
+[32m+[m
+[32m+[m[32m        <RequireConsentSwitch Condition=" $(RequireRestoreConsent) == 'true' ">-RequireConsent</RequireConsentSwitch>[m
+[32m+[m[32m        <NonInteractiveSwitch Condition=" '$(VisualStudioVersion)' != '' AND '$(OS)' == 'Windows_NT' ">-NonInteractive</NonInteractiveSwitch>[m
+[32m+[m
+[32m+[m[32m        <PaddedSolutionDir Condition=" '$(OS)' == 'Windows_NT'">"$(SolutionDir) "</PaddedSolutionDir>[m
+[32m+[m[32m        <PaddedSolutionDir Condition=" '$(OS)' != 'Windows_NT' ">"$(SolutionDir)"</PaddedSolutionDir>[m
+[32m+[m
+[32m+[m[32m        <!-- Commands -->[m
+[32m+[m[32m        <RestoreCommand>$(NuGetCommand) install "$(PackagesConfig)" -source "$(PackageSources)"  $(NonInteractiveSwitch) $(RequireConsentSwitch) -solutionDir $(PaddedSolutionDir)</RestoreCommand>[m
+[32m+[m[32m        <BuildCommand>$(NuGetCommand) pack "$(ProjectPath)" -Properties "Configuration=$(Configuration);Platform=$(Platform)" $(NonInteractiveSwitch) -OutputDirectory "$(PackageOutputDir)" -symbols</BuildCommand>[m
+[32m+[m
+[32m+[m[32m        <!-- We need to ensure packages are restored prior to assembly resolve -->[m
+[32m+[m[32m        <BuildDependsOn Condition="$(RestorePackages) == 'true'">[m
+[32m+[m[32m            RestorePackages;[m
+[32m+[m[32m            $(BuildDependsOn);[m
+[32m+[m[32m        </BuildDependsOn>[m
+[32m+[m
+[32m+[m[32m        <!-- Make the build depend on restore packages -->[m
+[32m+[m[32m        <BuildDependsOn Condition="$(BuildPackage) == 'true'">[m
+[32m+[m[32m            $(BuildDependsOn);[m
+[32m+[m[32m            BuildPackage;[m
+[32m+[m[32m        </BuildDependsOn>[m
+[32m+[m[32m    </PropertyGroup>[m
+[32m+[m
+[32m+[m[32m    <Target Name="CheckPrerequisites">[m
+[32m+[m[32m        <!-- Raise an error if we're unable to locate nuget.exe  -->[m
+[32m+[m[32m        <Error Condition="'$(DownloadNuGetExe)' != 'true' AND !Exists('$(NuGetExePath)')" Text="Unable to locate '$(NuGetExePath)'" />[m
+[32m+[m[32m        <!--[m
+[32m+[m[32m        Take advantage of MsBuild's build dependency tracking to make sure that we only ever download nuget.exe once.[m
+[32m+[m[32m        This effectively acts as a lock that makes sure that the download operation will only happen once and all[m
+[32m+[m[32m        parallel builds will have to wait for it to complete.[m
+[32m+[m[32m        -->[m
+[32m+[m[32m        <MsBuild Targets="_DownloadNuGet" Projects="$(MSBuildThisFileFullPath)" Properties="Configuration=NOT_IMPORTANT;DownloadNuGetExe=$(DownloadNuGetExe)" />[m
+[32m+[m[32m    </Target>[m
+[32m+[m
+[32m+[m[32m    <Target Name="_DownloadNuGet">[m
+[32m+[m[32m        <DownloadNuGet OutputFilename="$(NuGetExePath)" Condition=" '$(DownloadNuGetExe)' == 'true' AND !Exists('$(NuGetExePath)')" />[m
+[32m+[m[32m    </Target>[m
+[32m+[m
+[32m+[m[32m    <Target Name="RestorePackages" DependsOnTargets="CheckPrerequisites">[m[41m        [m
+[32m+[m[32m        <Exec Command="$(RestoreCommand)"[m
+[32m+[m[32m              Condition="'$(OS)' != 'Windows_NT' And Exists('$(PackagesConfig)')" />[m
+[32m+[m
+[32m+[m[32m        <Exec Command="$(RestoreCommand)"[m
+[32m+[m[32m              LogStandardErrorAsError="true"[m
+[32m+[m[32m              Condition="'$(OS)' == 'Windows_NT' And Exists('$(PackagesConfig)')" />[m
+[32m+[m[32m    </Target>[m
+[32m+[m
+[32m+[m[32m    <Target Name="BuildPackage" DependsOnTargets="CheckPrerequisites">[m
+[32m+[m[32m        <Exec Command="$(BuildCommand)"[m
+[32m+[m[32m              Condition=" '$(OS)' != 'Windows_NT' " />[m
+[32m+[m
+[32m+[m[32m        <Exec Command="$(BuildCommand)"[m
+[32m+[m[32m              LogStandardErrorAsError="true"[m
+[32m+[m[32m              Condition=" '$(OS)' == 'Windows_NT' " />[m
+[32m+[m[32m    </Target>[m
+[32m+[m
+[32m+[m[32m    <UsingTask TaskName="DownloadNuGet" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">[m
+[32m+[m[32m        <ParameterGroup>[m
+[32m+[m[32m            <OutputFilename ParameterType="System.String" Required="true" />[m
+[32m+[m[32m        </ParameterGroup>[m
+[32m+[m[32m        <Task>[m
+[32m+[m[32m            <Reference Include="System.Core" />[m
+[32m+[m[32m            <Using Namespace="System" />[m
+[32m+[m[32m            <Using Namespace="System.IO" />[m
+[32m+[m[32m            <Using Namespace="System.Net" />[m
+[32m+[m[32m            <Using Namespace="Microsoft.Build.Framework" />[m
+[32m+[m[32m            <Using Namespace="Microsoft.Build.Utilities" />[m
+[32m+[m[32m            <Code Type="Fragment" Language="cs">[m
+[32m+[m[32m                <![CDATA[[m
+[32m+[m[32m                try {[m
+[32m+[m[32m                    OutputFilename = Path.GetFullPath(OutputFilename);[m
+[32m+[m
+[32m+[m[32m                    Log.LogMessage("Downloading latest version of NuGet.exe...");[m
+[32m+[m[32m                    WebClient webClient = new WebClient();[m
+[32m+[m[32m                    webClient.DownloadFile("https://www.nuget.org/nuget.exe", OutputFilename);[m
+[32m+[m
+[32m+[m[32m                    return true;[m
+[32m+[m[32m                }[m
+[32m+[m[32m                catch (Exception ex) {[m
+[32m+[m[32m                    Log.LogErrorFromException(ex);[m
+[32m+[m[32m                    return false;[m
+[32m+[m[32m                }[m
+[32m+[m[32m            ]]>[m
+[32m+[m[32m            </Code>[m
+[32m+[m[32m        </Task>[m
+[32m+[m[32m    </UsingTask>[m
+[32m+[m[32m</Project>[m
+[1mdiff --git a/FCIH_OJ.sln b/FCIH_OJ.sln[m
+[1mindex 579c21a..7309e5f 100644[m
+[1m--- a/FCIH_OJ.sln[m
+[1m+++ b/FCIH_OJ.sln[m
+[36m@@ -1,7 +1,7 @@[m
+ ﻿[m
+ Microsoft Visual Studio Solution File, Format Version 12.00[m
+ # Visual Studio 2012[m
+[31m-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FCIH_OJ", "FCIH_OJ\FCIH_OJ.csproj", "{BB4286A7-056B-467E-B3B2-E9FE94095360}"[m
+[32m+[m[32mProject("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FCIH_OJ", "FCIH_OJ\FCIH_OJ.csproj", "{6BBB2E1E-1C25-4B91-8F19-DC6FC95F5C1E}"[m
+ EndProject[m
+ Global[m
+ 	GlobalSection(SolutionConfigurationPlatforms) = preSolution[m
+[36m@@ -9,10 +9,10 @@[m [mGlobal[m
+ 		Release|Any CPU = Release|Any CPU[m
+ 	EndGlobalSection[m
+ 	GlobalSection(ProjectConfigurationPlatforms) = postSolution[m
+[31m-		{BB4286A7-056B-467E-B3B2-E9FE94095360}.Debug|Any CPU.ActiveCfg = Debug|Any CPU[m
+[31m-		{BB4286A7-056B-467E-B3B2-E9FE94095360}.Debug|Any CPU.Build.0 = Debug|Any CPU[m
+[31m-		{BB4286A7-056B-467E-B3B2-E9FE94095360}.Release|Any CPU.ActiveCfg = Release|Any CPU[m
+[31m-		{BB4286A7-056B-467E-B3B2-E9FE94095360}.Release|Any CPU.Build.0 = Release|Any CPU[m
+[32m+[m		[32m{6BBB2E1E-1C25-4B91-8F19-DC6FC95F5C1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU[m
+[32m+[m		[32m{6BBB2E1E-1C25-4B91-8F19-DC6FC95F5C1E}.Debug|Any CPU.Build.0 = Debug|Any CPU[m
+[32m+[m		[32m{6BBB2E1E-1C25-4B91-8F19-DC6FC95F5C1E}.Release|Any CPU.ActiveCfg = Release|Any CPU[m
+[32m+[m		[32m{6BBB2E1E-1C25-4B91-8F19-DC6FC95F5C1E}.Release|Any CPU.Build.0 = Release|Any CPU[m
+ 	EndGlobalSection[m
+ 	GlobalSection(SolutionProperties) = preSolution[m
+ 		HideSolutionNode = FALSE[m
+[1mdiff --git a/FCIH_OJ/App_Data/ASPNETDB.MDF b/FCIH_OJ/App_Data/ASPNETDB.MDF[m
+[1mnew file mode 100644[m
+[1mindex 0000000..8269461[m
+Binary files /dev/null and b/FCIH_OJ/App_Data/ASPNETDB.MDF differ
+[1mdiff --git a/FCIH_OJ/App_Data/FCIH_OJ-dev.mdf b/FCIH_OJ/App_Data/FCIH_OJ-dev.mdf[m
+[1mnew file mode 100644[m
+[1mindex 0000000..20fadcb[m
+Binary files /dev/null and b/FCIH_OJ/App_Data/FCIH_OJ-dev.mdf differ
+[1mdiff --git a/FCIH_OJ/ClassDiagram1.cd b/FCIH_OJ/ClassDiagram1.cd[m
+[1mdeleted file mode 100644[m
+[1mindex 7b89419..0000000[m
+[1m--- a/FCIH_OJ/ClassDiagram1.cd[m
+[1m+++ /dev/null[m
+[36m@@ -1,2 +0,0 @@[m
+[31m-﻿<?xml version="1.0" encoding="utf-8"?>[m
+[31m-<ClassDiagram /> [m
+\ No newline at end of file[m
+[1mdiff --git a/FCIH_OJ/Controllers/AccountController.cs b/FCIH_OJ/Controllers/AccountController.cs[m
+[1mnew file mode 100644[m
+[1mindex 0000000..7689862[m
+[1m--- /dev/null[m
+[1m+++ b/FCIH_OJ/Controllers/AccountController.cs[m
+[36m@@ -0,0 +1,150 @@[m
+[32m+[m[32m﻿using System;[m
+[32m+[m[32musing System.Collections.Generic;[m
+[32m+[m[32musing System.Linq;[m
+[32m+[m[32musing System.Transactions;[m
+[32m+[m[32musing System.Web;[m
+[32m+[m[32musing System.Web.Mvc;[m
+[32m+[m[32musing System.Web.Security;[m
+[32m+[m[32musing DotNetOpenAuth.AspNet;[m
+[32m+[m[32musing Microsoft.Web.WebPages.OAuth;[m
+[32m+[m[32musing WebMatrix.WebData;[m
+[32m+[m[32musing FCIH_OJ.Models;[m
+[32m+[m[32musing FCIH_OJ.Validations;[m
+[32m+[m
+[32m+[m[32mnamespace FCIH_OJ.Controllers[m
+[32m+[m[32m{[m
+[32m+[m[32m    public class AccountController : Controller[m
+[32m+[m[32m    {[m
+[32m+[m
+[32m+[m[32m        private UsersContext UsersContext = new UsersContext();[m
+[32m+[m
+[32m+[m[32m        //[m
+[32m+[m[32m        // GET: /Account/Login[m
+[32m+[m
+[32m+[m[32m        [AnonymousOnly][m
+[32m+[m[32m        public ActionResult Login(string returnUrl)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            ViewBag.ReturnUrl = returnUrl;[m
+[32m+[m[32m            return View();[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        //[m
+[32m+[m[32m        // POST: /Account/Login[m
+[32m+[m
+[32m+[m[32m        [HttpPost][m
+[32m+[m[32m        [AnonymousOnly][m
+[32m+[m[32m        [ValidateAntiForgeryToken][m
+[32m+[m[32m        public ActionResult Login(LoginModel model, string returnUrl)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            if (ModelState.IsValid && UserManager.Login(model.UserName, model.Password))[m
+[32m+[m[32m            {[m
+[32m+[m[32m                return RedirectToLocal(returnUrl);[m
+[32m+[m[32m            }[m
+[32m+[m
+[32m+[m[32m            // If we got this far, something failed, redisplay form[m
+[32m+[m[32m            ModelState.AddModelError("", "The user name or password provided is incorrect.");[m
+[32m+[m[32m            return View(model);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        //[m
+[32m+[m[32m        // POST: /Account/LogOff[m
+[32m+[m
+[32m+[m[32m        [HttpPost][m
+[32m+[m[32m        [ValidateAntiForgeryToken][m
+[32m+[m[32m        [Authorize][m
+[32m+[m[32m        public ActionResult LogOff()[m
+[32m+[m[32m        {[m
+[32m+[m[32m            UserManager.Logout();[m
+[32m+[m[32m            return RedirectToAction("Index", "Home");[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        //[m
+[32m+[m[32m        // GET: /Account/Register[m
+[32m+[m
+[32m+[m[32m        [AnonymousOnly][m
+[32m+[m[32m        public ActionResult Register()[m
+[32m+[m[32m        {[m
+[32m+[m[32m            return View();[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        //[m
+[32m+[m[32m        // POST: /Account/Register[m
+[32m+[m
+[32m+[m[32m        [HttpPost][m
+[32m+[m[32m        [AnonymousOnly][m
+[32m+[m[32m        [ValidateAntiForgeryToken][m
+[32m+[m[32m        public ActionResult Register(RegisterModel model)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            if (ModelState.IsValid)[m
+[32m+[m[32m            {[m
+[32m+[m[32m                UserManager.Register(model);[m
+[32m+[m[32m                UserManager.Login(model.UserName, model.Password);[m
+[32m+[m[32m                return RedirectToAction("Index", "Home");[m
+[32m+[m[32m            }[m
+[32m+[m
+[32m+[m[32m            // If we got this far, something failed, redisplay form[m
+[32m+[m[32m            return View(model);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        //[m
+[32m+[m[32m        // GET: /Account/View[m
+[32m+[m[32m        [Authorize][m
+[32m+[m[32m        public ActionResult View()[m
+[32m+[m[32m        {[m
+[32m+[m[32m            UserProfile Userprofile = UserManager.GetUserById((int)WebSecurity.CurrentUserId);[m
+[32m+[m[32m            return View(Userprofile);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        //[m
+[32m+[m[32m        // GET: /Account/Manage[m
+[32m+[m[32m        [Authorize][m
+[32m+[m[32m        public ActionResult Manage()[m
+[32m+[m[32m        {[m
+[32m+[m[32m            UserProfile Userprofile = UserManager.GetUserById((int)WebSecurity.CurrentUserId);[m
+[32m+[m[32m            EditProfileModel model = new EditProfileModel();[m
+[32m+[m[32m            model.UserName = Userprofile.UserName;[m
+[32m+[m[32m            model.UserId = Userprofile.UserId;[m
+[32m+[m[32m            model.Email = Userprofile.Email;[m
+[32m+[m[32m            ViewBag.ReturnUrl = Url.Action("Manage");[m
+[32m+[m[32m            return View(model);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        //[m
+[32m+[m[32m        // POST: /Account/Manage[m
+[32m+[m
+[32m+[m[32m        [HttpPost][m
+[32m+[m[32m        [ValidateAntiForgeryToken][m
+[32m+[m[32m        [Authorize][m
+[32m+[m[32m        public ActionResult Manage(EditProfileModel model)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            ViewBag.ReturnUrl = Url.Action("Manage");[m
+[32m+[m[32m            if (ModelState.IsValid)[m
+[32m+[m[32m            {[m
+[32m+[m[32m                UserProfile Userprofile = UserManager.GetUserById((int)WebSecurity.CurrentUserId);[m
+[32m+[m[32m                model.Email = Userprofile.Email;[m
+[32m+[m[32m                model.UserName = Userprofile.UserName;[m
+[32m+[m[32m                model.UserId = Userprofile.UserId;[m
+[32m+[m[32m                UserManager.EditUser(model);[m
+[32m+[m[32m                ModelState.AddModelError("", "Profile Updated Successfully.");[m
+[32m+[m[32m            }[m
+[32m+[m
+[32m+[m[32m            // If we got this far, something failed, redisplay form[m
+[32m+[m[32m            return View(model);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        //helpers[m
+[32m+[m[32m        #region Helpers[m
+[32m+[m[32m        private ActionResult RedirectToLocal(string returnUrl)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            if (Url.IsLocalUrl(returnUrl))[m
+[32m+[m[32m            {[m
+[32m+[m[32m                return Redirect(returnUrl);[m
+[32m+[m[32m            }[m
+[32m+[m[32m            else[m
+[32m+[m[32m            {[m
+[32m+[m[32m                return RedirectToAction("Index", "Home");[m
+[32m+[m[32m            }[m
+[32m+[m[32m        }[m
+[32m+[m[32m        #endregion[m
+[32m+[m[32m    }[m
+[32m+[m[32m}[m
+[1mdiff --git a/FCIH_OJ/Controllers/AdminController.cs b/FCIH_OJ/Controllers/AdminController.cs[m
+[1mnew file mode 100644[m
+[1mindex 0000000..0a28ba6[m
+[1m--- /dev/null[m
+[1m+++ b/FCIH_OJ/Controllers/AdminController.cs[m
+[36m@@ -0,0 +1,121 @@[m
+[32m+[m[32m﻿using System;[m
+[32m+[m[32musing System.Collections.Generic;[m
+[32m+[m[32musing System.Data;[m
+[32m+[m[32musing System.Data.Entity;[m
+[32m+[m[32musing System.Linq;[m
+[32m+[m[32musing System.Web;[m
+[32m+[m[32musing System.Web.Mvc;[m
+[32m+[m[32musing System.Web.Security;[m
+[32m+[m[32musing FCIH_OJ.Models;[m
+[32m+[m
+[32m+[m[32mnamespace FCIH_OJ.Controllers[m
+[32m+[m[32m{[m
+[32m+[m[32m    [Authorize(Roles = "admin")][m
+[32m+[m[32m    public class AdminController : Controller[m
+[32m+[m[32m    {[m
+[32m+[m[32m        private UsersContext UserContext = new UsersContext();[m
+[32m+[m[41m        [m
+[32m+[m[32m        //[m
+[32m+[m[32m        // GET: /Admin/ManageUsers[m
+[32m+[m
+[32m+[m[32m        public ActionResult ManageUsers()[m
+[32m+[m[32m        {[m
+[32m+[m[32m            return View(UserContext.UserProfiles.ToList());[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        //[m
+[32m+[m[32m        // GET: /Admin/UserDetails/5[m
+[32m+[m
+[32m+[m[32m        public ActionResult UserDetails(int id = 0)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            UserProfile Userprofile = UserManager.GetUserById(id);[m
+[32m+[m[32m            if (Userprofile == null)[m
+[32m+[m[32m            {[m
+[32m+[m[32m                return HttpNotFound();[m
+[32m+[m[32m            }[m
+[32m+[m[32m            string[] Roles = UserManager.GetRolesByUserId(Userprofile.UserName);[m
+[32m+[m[32m            AdminUserProfile Adminuserprofile = new AdminUserProfile();[m
+[32m+[m[32m            Adminuserprofile.Roles = Roles;[m
+[32m+[m[32m            Adminuserprofile.UserId = id;[m
+[32m+[m[32m            Adminuserprofile.UserName = Userprofile.UserName;[m
+[32m+[m[32m            Adminuserprofile.Email = Userprofile.Email;[m
+[32m+[m[32m            //other vars[m
+[32m+[m[32m            return View(Adminuserprofile);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        //[m
+[32m+[m[32m        // GET: /Admin/EditUser/5[m
+[32m+[m
+[32m+[m[32m        public ActionResult EditUser(int id = 0)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            UserProfile Userprofile = UserManager.GetUserById(id);[m
+[32m+[m[32m            if (Userprofile == null)[m
+[32m+[m[32m            {[m
+[32m+[m[32m                return HttpNotFound();[m
+[32m+[m[32m            }[m
+[32m+[m[32m            string[] UserRoles = UserManager.GetRolesByUserId(Userprofile.UserName);[m
+[32m+[m[32m            AdminUserProfile Adminuserprofile = new AdminUserProfile();[m
+[32m+[m[32m            Adminuserprofile.Roles = UserRoles;[m
+[32m+[m[32m            Adminuserprofile.UserId = id;[m
+[32m+[m[32m            Adminuserprofile.UserName = Userprofile.UserName;[m
+[32m+[m[32m            Adminuserprofile.Email = Userprofile.Email;[m
+[32m+[m[32m            ViewData["RolesList"] = Roles.GetAllRoles();[m
+[32m+[m[32m            //other vars[m
+[32m+[m[32m            return View(Adminuserprofile);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        //[m
+[32m+[m[32m        // POST: /Admin/EditUser/5[m
+[32m+[m
+[32m+[m[32m        [HttpPost][m
+[32m+[m[32m        [ValidateAntiForgeryToken][m
+[32m+[m[32m        public ActionResult EditUser(AdminUserProfile Adminuserprofile)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            if (ModelState.IsValid)[m
+[32m+[m[32m            {[m
+[32m+[m[32m                EditProfileModel EditProfileModel = new EditProfileModel();[m
+[32m+[m[32m                EditProfileModel.UserId = Adminuserprofile.UserId;[m
+[32m+[m[32m                EditProfileModel.UserName = Adminuserprofile.UserName;[m
+[32m+[m[32m                EditProfileModel.Email = Adminuserprofile.Email;[m
+[32m+[m[32m                if (Adminuserprofile.NewPassword != null)[m
+[32m+[m[32m                {[m
+[32m+[m[32m                    EditProfileModel.NewPassword = Adminuserprofile.NewPassword;[m
+[32m+[m[32m                    UserManager.EditUser(EditProfileModel);[m
+[32m+[m[32m                }[m
+[32m+[m[32m                if (Roles.GetRolesForUser(Adminuserprofile.UserName).Length != 0 && Adminuserprofile.UserName != "admin")[m
+[32m+[m[32m                {[m
+[32m+[m[32m                    Roles.RemoveUserFromRoles(Adminuserprofile.UserName, Roles.GetRolesForUser(Adminuserprofile.UserName));[m
+[32m+[m[32m                }[m
+[32m+[m[32m                if (Adminuserprofile.Roles != null && Adminuserprofile.Roles.Length != 0 && Adminuserprofile.UserName != "admin")[m
+[32m+[m[32m                {[m
+[32m+[m[32m                    Roles.AddUserToRoles(Adminuserprofile.UserName, Adminuserprofile.Roles);[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m[32m            return RedirectToAction("ManageUsers", "Admin");[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        //[m
+[32m+[m[32m        // GET: /Admin/DeleteUser/5[m
+[32m+[m
+[32m+[m[32m        public ActionResult DeleteUser(int id = 0)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            UserProfile userprofile = UserManager.GetUserById(id);[m
+[32m+[m[32m            if (userprofile == null)[m
+[32m+[m[32m            {[m
+[32m+[m[32m                return HttpNotFound();[m
+[32m+[m[32m            }[m
+[32m+[m[32m            return View(userprofile);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        //[m
+[32m+[m[32m        // POST: /Admin/DeleteUser/5[m
+[32m+[m
+[32m+[m[32m        [HttpPost, ActionName("DeleteUser")][m
+[32m+[m[32m        [ValidateAntiForgeryToken][m
+[32m+[m[32m        public ActionResult DeleteConfirmed(int id)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            UserManager.DeleteUserByUserName(UserManager.GetUserById(id).UserName);[m
+[32m+[m[32m            return RedirectToAction("ManageUsers");[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m[32m}[m
+\ No newline at end of file[m
+[1mdiff --git a/FCIH_OJ/Controllers/UserController.cs b/FCIH_OJ/Controllers/UserController.cs[m
+[1mdeleted file mode 100644[m
+[1mindex 1a02b8f..0000000[m
+[1m--- a/FCIH_OJ/Controllers/UserController.cs[m
+[1m+++ /dev/null[m
+[36m@@ -1,19 +0,0 @@[m
+[31m-﻿using System;[m
+[31m-using System.Collections.Generic;[m
+[31m-using System.Linq;[m
+[31m-using System.Transactions;[m
+[31m-using System.Web;[m
+[31m-using System.Web.Mvc;[m
+[31m-using System.Web.Security;[m
+[31m-using FCIH_OJ.Models;[m
+[31m-[m
+[31m-namespace FCIH_OJ.Controllers[m
+[31m-{[m
+[31m-    [Authorize][m
+[31m-    public class UserController : Controller[m
+[31m-    {[m
+[31m-       [m
+[31m-        // my methods[m
+[31m-        [m
+[31m-    }[m
+[31m-}[m
+[1mdiff --git a/FCIH_OJ/FCIH_OJ.csproj b/FCIH_OJ/FCIH_OJ.csproj[m
+[1mindex 9f4f573..4779680 100644[m
+[1m--- a/FCIH_OJ/FCIH_OJ.csproj[m
+[1m+++ b/FCIH_OJ/FCIH_OJ.csproj[m
+[36m@@ -7,7 +7,7 @@[m
+     <ProductVersion>[m
+     </ProductVersion>[m
+     <SchemaVersion>2.0</SchemaVersion>[m
+[31m-    <ProjectGuid>{BB4286A7-056B-467E-B3B2-E9FE94095360}</ProjectGuid>[m
+[32m+[m[32m    <ProjectGuid>{6BBB2E1E-1C25-4B91-8F19-DC6FC95F5C1E}</ProjectGuid>[m
+     <ProjectTypeGuids>{E3E379DF-F4C6-4180-9B81-6769533ABE47};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>[m
+     <OutputType>Library</OutputType>[m
+     <AppDesignerFolder>Properties</AppDesignerFolder>[m
+[36m@@ -20,6 +20,8 @@[m
+     <IISExpressAnonymousAuthentication />[m
+     <IISExpressWindowsAuthentication />[m
+     <IISExpressUseClassicPipelineMode />[m
+[32m+[m[32m    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>[m
+[32m+[m[32m    <RestorePackages>true</RestorePackages>[m
+   </PropertyGroup>[m
+   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">[m
+     <DebugSymbols>true</DebugSymbols>[m
+[36m@@ -71,14 +73,26 @@[m
+       <Private>True</Private>[m
+       <HintPath>..\packages\Microsoft.AspNet.Mvc.FixedDisplayModes.1.0.0\lib\net40\Microsoft.Web.Mvc.FixedDisplayModes.dll</HintPath>[m
+     </Reference>[m
+[32m+[m[32m    <Reference Include="Newtonsoft.Json">[m
+[32m+[m[32m      <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>[m
+[32m+[m[32m    </Reference>[m
+     <Reference Include="System.Net.Http">[m
+     </Reference>[m
+[32m+[m[32m    <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">[m
+[32m+[m[32m      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.4.0.20710.0\lib\net40\System.Net.Http.Formatting.dll</HintPath>[m
+[32m+[m[32m    </Reference>[m
+     <Reference Include="System.Net.Http.WebRequest">[m
+     </Reference>[m
+     <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">[m
+       <Private>True</Private>[m
+       <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.Helpers.dll</HintPath>[m
+     </Reference>[m
+[32m+[m[32m    <Reference Include="System.Web.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">[m
+[32m+[m[32m      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.4.0.20710.0\lib\net40\System.Web.Http.dll</HintPath>[m
+[32m+[m[32m    </Reference>[m
+[32m+[m[32m    <Reference Include="System.Web.Http.WebHost, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">[m
+[32m+[m[32m      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.4.0.20710.0\lib\net40\System.Web.Http.WebHost.dll</HintPath>[m
+[32m+[m[32m    </Reference>[m
+     <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">[m
+       <Private>True</Private>[m
+       <HintPath>..\packages\Microsoft.AspNet.Mvc.4.0.20710.0\lib\net40\System.Web.Mvc.dll</HintPath>[m
+[36m@@ -102,6 +116,58 @@[m
+       <Private>True</Private>[m
+       <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.WebPages.Razor.dll</HintPath>[m
+     </Reference>[m
+[32m+[m[32m    <Reference Include="WebMatrix.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">[m
+[32m+[m[32m      <Private>True</Private>[m
+[32m+[m[32m      <HintPath>..\packages\Microsoft.AspNet.WebPages.Data.2.0.20710.0\lib\net40\WebMatrix.Data.dll</HintPath>[m
+[32m+[m[32m    </Reference>[m
+[32m+[m[32m    <Reference Include="Microsoft.Web.WebPages.OAuth, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">[m
+[32m+[m[32m      <Private>True</Private>[m
+[32m+[m[32m      <HintPath>..\packages\Microsoft.AspNet.WebPages.OAuth.2.0.20710.0\lib\net40\Microsoft.Web.WebPages.OAuth.dll</HintPath>[m
+[32m+[m[32m    </Reference>[m
+[32m+[m[32m    <Reference Include="WebMatrix.WebData, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">[m
+[32m+[m[32m      <Private>True</Private>[m
+[32m+[m[32m      <HintPath>..\packages\Microsoft.AspNet.WebPages.WebData.2.0.20710.0\lib\net40\WebMatrix.WebData.dll</HintPath>[m
+[32m+[m[32m    </Reference>[m
+[32m+[m[32m    <Reference Include="DotNetOpenAuth.AspNet, Version=4.1.0.0, Culture=neutral, PublicKeyToken=2780ccd10d57b246, processorArchitecture=MSIL">[m
+[32m+[m[32m      <Private>True</Private>[m
+[32m+[m[32m      <HintPath>..\packages\DotNetOpenAuth.AspNet.4.1.4.12333\lib\net45-full\DotNetOpenAuth.AspNet.dll</HintPath>[m
+[32m+[m[32m    </Reference>[m
+[32m+[m[32m    <Reference Include="DotNetOpenAuth.Core, Version=4.1.0.0, Culture=neutral, PublicKeyToken=2780ccd10d57b246, processorArchitecture=MSIL">[m
+[32m+[m[32m      <Private>True</Private>[m
+[32m+[m[32m      <HintPath>..\packages\DotNetOpenAuth.Core.4.1.4.12333\lib\net45-full\DotNetOpenAuth.Core.dll</HintPath>[m
+[32m+[m[32m    </Reference>[m
+[32m+[m[32m    <Reference Include="DotNetOpenAuth.OAuth.Consumer, Version=4.1.0.0, Culture=neutral, PublicKeyToken=2780ccd10d57b246, processorArchitecture=MSIL">[m
+[32m+[m[32m      <Private>True</Private>[m
+[32m+[m[32m      <HintPath>..\packages\DotNetOpenAuth.OAuth.Consumer.4.1.4.12333\lib\net45-full\DotNetOpenAuth.OAuth.Consumer.dll</HintPath>[m
+[32m+[m[32m    </Reference>[m
+[32m+[m[32m    <Reference Include="DotNetOpenAuth.OAuth, Version=4.1.0.0, Culture=neutral, PublicKeyToken=2780ccd10d57b246, processorArchitecture=MSIL">[m
+[32m+[m[32m      <Private>True</Private>[m
+[32m+[m[32m      <HintPath>..\packages\DotNetOpenAuth.OAuth.Core.4.1.4.12333\lib\net45-full\DotNetOpenAuth.OAuth.dll</HintPath>[m
+[32m+[m[32m    </Reference>[m
+[32m+[m[32m    <Reference Include="DotNetOpenAuth.OpenId, Version=4.1.0.0, Culture=neutral, PublicKeyToken=2780ccd10d57b246, processorArchitecture=MSIL">[m
+[32m+[m[32m      <Private>True</Private>[m
+[32m+[m[32m      <HintPath>..\packages\DotNetOpenAuth.OpenId.Core.4.1.4.12333\lib\net45-full\DotNetOpenAuth.OpenId.dll</HintPath>[m
+[32m+[m[32m    </Reference>[m
+[32m+[m[32m    <Reference Include="DotNetOpenAuth.OpenId.RelyingParty, Version=4.1.0.0, Culture=neutral, PublicKeyToken=2780ccd10d57b246, processorArchitecture=MSIL">[m
+[32m+[m[32m      <Private>True</Private>[m
+[32m+[m[32m      <HintPath>..\packages\DotNetOpenAuth.OpenId.RelyingParty.4.1.4.12333\lib\net45-full\DotNetOpenAuth.OpenId.RelyingParty.dll</HintPath>[m
+[32m+[m[32m    </Reference>[m
+[32m+[m[32m    <Reference Include="System.Web.Http.OData, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">[m
+[32m+[m[32m      <Private>True</Private>[m
+[32m+[m[32m      <HintPath>..\packages\Microsoft.AspNet.WebApi.OData.4.0.0\lib\net40\System.Web.Http.OData.dll</HintPath>[m
+[32m+[m[32m    </Reference>[m
+[32m+[m[32m    <Reference Include="Microsoft.Data.Edm, Version=5.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">[m
+[32m+[m[32m      <Private>True</Private>[m
+[32m+[m[32m      <HintPath>..\packages\Microsoft.Data.Edm.5.2.0\lib\net40\Microsoft.Data.Edm.dll</HintPath>[m
+[32m+[m[32m    </Reference>[m
+[32m+[m[32m    <Reference Include="Microsoft.Data.OData, Version=5.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">[m
+[32m+[m[32m      <Private>True</Private>[m
+[32m+[m[32m      <HintPath>..\packages\Microsoft.Data.OData.5.2.0\lib\net40\Microsoft.Data.OData.dll</HintPath>[m
+[32m+[m[32m    </Reference>[m
+[32m+[m[32m    <Reference Include="System.Spatial, Version=5.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">[m
+[32m+[m[32m      <Private>True</Private>[m
+[32m+[m[32m      <HintPath>..\packages\System.Spatial.5.2.0\lib\net40\System.Spatial.dll</HintPath>[m
+[32m+[m[32m    </Reference>[m
+     <Reference Include="WebGrease">[m
+       <Private>True</Private>[m
+       <HintPath>..\packages\WebGrease.1.3.0\lib\WebGrease.dll</HintPath>[m
+[36m@@ -114,24 +180,38 @@[m
+   <ItemGroup>[m
+     <Compile Include="App_Start\BundleConfig.cs" />[m
+     <Compile Include="App_Start\RouteConfig.cs" />[m
+[31m-    <Compile Include="Controllers\UserController.cs" />[m
+[32m+[m[32m    <Compile Include="Controllers\AccountController.cs" />[m
+[32m+[m[32m    <Compile Include="Controllers\AdminController.cs" />[m
+     <Compile Include="Controllers\HomeController.cs" />[m
+     <Compile Include="Global.asax.cs">[m
+       <DependentUpon>Global.asax</DependentUpon>[m
+     </Compile>[m
+[31m-    <Compile Include="Migrations\201611022321289_Initial.cs" />[m
+[31m-    <Compile Include="Migrations\201611022321289_Initial.Designer.cs">[m
+[31m-      <DependentUpon>201611022321289_Initial.cs</DependentUpon>[m
+[32m+[m[32m    <Compile Include="Migrations\201611082300069_Initial.cs" />[m
+[32m+[m[32m    <Compile Include="Migrations\201611082300069_Initial.Designer.cs">[m
+[32m+[m[32m      <DependentUpon>201611082300069_Initial.cs</DependentUpon>[m
+[32m+[m[32m    </Compile>[m
+[32m+[m[32m    <Compile Include="Migrations\201611091933489_migration.cs" />[m
+[32m+[m[32m    <Compile Include="Migrations\201611091933489_migration.Designer.cs">[m
+[32m+[m[32m      <DependentUpon>201611091933489_migration.cs</DependentUpon>[m
+     </Compile>[m
+     <Compile Include="Migrations\Configuration.cs" />[m
+[31m-    <Compile Include="Models\UserModels.cs" />[m
+[32m+[m[32m    <Compile Include="Models\AccountModels.cs" />[m
+     <Compile Include="Properties\AssemblyInfo.cs" />[m
+[32m+[m[32m    <Compile Include="Validations\Validations.cs" />[m
+   </ItemGroup>[m
+   <ItemGroup>[m
+[32m+[m[32m    <Content Include="Assets\css\bootstrap.css" />[m
+     <Content Include="Assets\css\general.css" />[m
+[32m+[m[32m    <Content Include="Assets\js\bootstrap.js" />[m
+     <Content Include="Assets\js\general.js" />[m
+[32m+[m[32m    <Content Include="Assets\js\jquery-3.1.1.js" />[m
+     <Content Include="favicon.ico" />[m
+     <Content Include="Global.asax" />[m
+[32m+[m[32m    <Content Include="Assets\fonts\glyphicons-halflings-regular.eot" />[m
+[32m+[m[32m    <Content Include="Assets\fonts\glyphicons-halflings-regular.svg" />[m
+[32m+[m[32m    <Content Include="Assets\fonts\glyphicons-halflings-regular.ttf" />[m
+[32m+[m[32m    <Content Include="Assets\fonts\glyphicons-halflings-regular.woff" />[m
+[32m+[m[32m    <Content Include="Assets\fonts\glyphicons-halflings-regular.woff2" />[m
+     <Content Include="Web.config" />[m
+     <Content Include="Web.Debug.config">[m
+       <DependentUpon>Web.config</DependentUpon>[m
+[36m@@ -140,17 +220,15 @@[m
+       <DependentUpon>Web.config</DependentUpon>[m
+     </Content>[m
+     <Content Include="Views\_ViewStart.cshtml" />[m
+[31m-    <Content Include="Views\User\_ChangePasswordPartial.cshtml" />[m
+[31m-    <Content Include="Views\User\_SetPasswordPartial.cshtml" />[m
+[31m-    <Content Include="Views\User\Login.cshtml" />[m
+[31m-    <Content Include="Views\User\Manage.cshtml" />[m
+[31m-    <Content Include="Views\User\Register.cshtml" />[m
+[32m+[m[32m    <Content Include="Views\Account\Login.cshtml" />[m
+[32m+[m[32m    <Content Include="Views\Account\Manage.cshtml" />[m
+[32m+[m[32m    <Content Include="Views\Account\Register.cshtml" />[m
+     <Content Include="Views\Home\About.cshtml" />[m
+     <Content Include="Views\Home\Contact.cshtml" />[m
+     <Content Include="Views\Home\Index.cshtml" />[m
+[31m-    <Content Include="Views\Layouts\Error.cshtml" />[m
+[31m-    <Content Include="Views\Layouts\_LoginPartial.cshtml" />[m
+[31m-    <Content Include="Views\Layouts\_Layout.cshtml" />[m
+[32m+[m[32m    <Content Include="Views\Shared\Error.cshtml" />[m
+[32m+[m[32m    <Content Include="Views\Shared\_LoginPartial.cshtml" />[m
+[32m+[m[32m    <Content Include="Views\Shared\_Layout.cshtml" />[m
+     <Content Include="Views\Web.config" />[m
+   </ItemGroup>[m
+   <ItemGroup>[m
+[36m@@ -161,12 +239,27 @@[m
+     <Content Include="packages.config" />[m
+   </ItemGroup>[m
+   <ItemGroup>[m
+[31m-    <EmbeddedResource Include="Migrations\201611022321289_Initial.resx">[m
+[31m-      <DependentUpon>201611022321289_Initial.cs</DependentUpon>[m
+[32m+[m[32m    <EmbeddedResource Include="Migrations\201611082300069_Initial.resx">[m
+[32m+[m[32m      <DependentUpon>201611082300069_Initial.cs</DependentUpon>[m
+     </EmbeddedResource>[m
+[32m+[m[32m    <EmbeddedResource Include="Migrations\201611091933489_migration.resx">[m
+[32m+[m[32m      <DependentUpon>201611091933489_migration.cs</DependentUpon>[m
+[32m+[m[32m    </EmbeddedResource>[m
+[32m+[m[32m  </ItemGroup>[m
+[32m+[m[32m  <ItemGroup>[m
+[32m+[m[32m    <Content Include="Views\Admin\ManageUsers.cshtml" />[m
+[32m+[m[32m  </ItemGroup>[m
+[32m+[m[32m  <ItemGroup>[m
+[32m+[m[32m    <Content Include="Views\Admin\UserDetails.cshtml" />[m
+   </ItemGroup>[m
+   <ItemGroup>[m
+[31m-    <Content Include="ClassDiagram1.cd" />[m
+[32m+[m[32m    <Content Include="Views\Admin\EditUser.cshtml" />[m
+[32m+[m[32m  </ItemGroup>[m
+[32m+[m[32m  <ItemGroup>[m
+[32m+[m[32m    <Content Include="Views\Admin\DeleteUser.cshtml" />[m
+[32m+[m[32m  </ItemGroup>[m
+[32m+[m[32m  <ItemGroup>[m
+[32m+[m[32m    <Content Include="Views\Account\View.cshtml" />[m
+   </ItemGroup>[m
+   <PropertyGroup>[m
+     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>[m
+[36m@@ -186,7 +279,7 @@[m
+           <AutoAssignPort>True</AutoAssignPort>[m
+           <DevelopmentServerPort>0</DevelopmentServerPort>[m
+           <DevelopmentServerVPath>/</DevelopmentServerVPath>[m
+[31m-          <IISUrl>http://localhost:63046/</IISUrl>[m
+[32m+[m[32m          <IISUrl>http://localhost:55767/</IISUrl>[m
+           <NTLMAuthentication>False</NTLMAuthentication>[m
+           <UseCustomServer>False</UseCustomServer>[m
+           <CustomServerUrl>[m
+[36m@@ -196,6 +289,13 @@[m
+       </FlavorProperties>[m
+     </VisualStudio>[m
+   </ProjectExtensions>[m
+[32m+[m[32m  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />[m
+[32m+[m[32m  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">[m
+[32m+[m[32m    <PropertyGroup>[m
+[32m+[m[32m      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>[m
+[32m+[m[32m    </PropertyGroup>[m
+[32m+[m[32m    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />[m
+[32m+[m[32m  </Target>[m
+   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. [m
+        Other similar extension points exist, see Microsoft.Common.targets.[m
+   <Target Name="BeforeBuild">[m
+[1mdiff --git a/FCIH_OJ/Global.asax.cs b/FCIH_OJ/Global.asax.cs[m
+[1mindex 617e351..096085a 100644[m
+[1m--- a/FCIH_OJ/Global.asax.cs[m
+[1m+++ b/FCIH_OJ/Global.asax.cs[m
+[36m@@ -1,11 +1,15 @@[m
+[31m-﻿using System;[m
+[32m+[m[32m﻿using FCIH_OJ.Models;[m
+[32m+[m[32musing System;[m
+ using System.Collections.Generic;[m
+[32m+[m[32musing System.Data.Entity;[m
+ using System.Linq;[m
+[32m+[m[32musing System.Threading;[m
+ using System.Web;[m
+ using System.Web.Http;[m
+ using System.Web.Mvc;[m
+ using System.Web.Optimization;[m
+ using System.Web.Routing;[m
+[32m+[m[32musing WebMatrix.WebData;[m
+ [m
+ namespace FCIH_OJ[m
+ {[m
+[36m@@ -14,12 +18,27 @@[m [mnamespace FCIH_OJ[m
+ [m
+     public class MvcApplication : System.Web.HttpApplication[m
+     {[m
+[32m+[m[32m        private static SimpleMembershipInitializer _initializer;[m
+[32m+[m[32m        private static object _initializerLock = new object();[m
+[32m+[m[32m        private static bool _isInitialized;[m
+[32m+[m
+         protected void Application_Start()[m
+         {[m
+             AreaRegistration.RegisterAllAreas();[m
+[31m-[m
+             RouteConfig.RegisterRoutes(RouteTable.Routes);[m
+             BundleConfig.RegisterBundles(BundleTable.Bundles);[m
+[32m+[m
+[32m+[m[32m            LazyInitializer.EnsureInitialized(ref _initializer, ref _isInitialized, ref _initializerLock);[m
+         }[m
+[32m+[m
+[32m+[m[32m        public class SimpleMembershipInitializer[m
+[32m+[m[32m        {[m
+[32m+[m[32m            public SimpleMembershipInitializer()[m
+[32m+[m[32m            {[m
+[32m+[m[32m                if (!WebSecurity.Initialized)[m
+[32m+[m[32m                    WebSecurity.InitializeDatabaseConnection("DefaultConnection", "UserProfile", "UserId", "UserName", autoCreateTables: true);[m
+[32m+[m[32m            }[m
+[32m+[m[32m        }[m
+[32m+[m
+     }[m
+ }[m
+\ No newline at end of file[m
+[1mdiff --git a/FCIH_OJ/Migrations/201611022321289_Initial.Designer.cs b/FCIH_OJ/Migrations/201611082300069_Initial.Designer.cs[m
+[1msimilarity index 92%[m
+[1mrename from FCIH_OJ/Migrations/201611022321289_Initial.Designer.cs[m
+[1mrename to FCIH_OJ/Migrations/201611082300069_Initial.Designer.cs[m
+[1mindex a8a46af..b88eebf 100644[m
+[1m--- a/FCIH_OJ/Migrations/201611022321289_Initial.Designer.cs[m
+[1m+++ b/FCIH_OJ/Migrations/201611082300069_Initial.Designer.cs[m
+[36m@@ -11,7 +11,7 @@[m [mnamespace FCIH_OJ.Migrations[m
+         [m
+         string IMigrationMetadata.Id[m
+         {[m
+[31m-            get { return "201611022321289_Initial"; }[m
+[32m+[m[32m            get { return "201611082300069_Initial"; }[m
+         }[m
+         [m
+         string IMigrationMetadata.Source[m
+[1mdiff --git a/FCIH_OJ/Migrations/201611082300069_Initial.cs b/FCIH_OJ/Migrations/201611082300069_Initial.cs[m
+[1mnew file mode 100644[m
+[1mindex 0000000..dc55c32[m
+[1m--- /dev/null[m
+[1m+++ b/FCIH_OJ/Migrations/201611082300069_Initial.cs[m
+[36m@@ -0,0 +1,26 @@[m
+[32m+[m[32mnamespace FCIH_OJ.Migrations[m
+[32m+[m[32m{[m
+[32m+[m[32m    using System;[m
+[32m+[m[32m    using System.Data.Entity.Migrations;[m
+[32m+[m[41m    [m
+[32m+[m[32m    public partial class Initial : DbMigration[m
+[32m+[m[32m    {[m
+[32m+[m[32m        public override void Up()[m
+[32m+[m[32m        {[m
+[32m+[m[32m            CreateTable([m
+[32m+[m[32m                "dbo.UserProfile",[m
+[32m+[m[32m                c => new[m
+[32m+[m[32m                    {[m
+[32m+[m[32m                        UserId = c.Int(nullable: false, identity: true),[m
+[32m+[m[32m                        UserName = c.String(),[m
+[32m+[m[32m                    })[m
+[32m+[m[32m                .PrimaryKey(t => t.UserId);[m
+[32m+[m[41m            [m
+[32m+[m[32m        }[m
+[32m+[m[41m        [m
+[32m+[m[32m        public override void Down()[m
+[32m+[m[32m        {[m
+[32m+[m[32m            DropTable("dbo.UserProfile");[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m[32m}[m
+[1mdiff --git a/FCIH_OJ/Migrations/201611022321289_Initial.resx b/FCIH_OJ/Migrations/201611082300069_Initial.resx[m
+[1msimilarity index 83%[m
+[1mrename from FCIH_OJ/Migrations/201611022321289_Initial.resx[m
+[1mrename to FCIH_OJ/Migrations/201611082300069_Initial.resx[m
+[1mindex 2be4b59..62ff937 100644[m
+[1m--- a/FCIH_OJ/Migrations/201611022321289_Initial.resx[m
+[1m+++ b/FCIH_OJ/Migrations/201611082300069_Initial.resx[m
+[36m@@ -118,6 +118,6 @@[m
+     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>[m
+   </resheader>[m
+   <data name="Target" xml:space="preserve">[m
+[31m-    <value>H4sIAAAAAAAEAM1Wy3LaMBTdd6b/4NGqXQSRxyLNmGRSCC1tCZk4yTYj7AtoqodryQx8Wxf9pP5Cr/ADY0NIMll0Z8v3nnvu0dG1/v7+418spPDmkBiuVYccttrEAxXqiKtph6R2cnBKLs7fv/OvIrnwHoq4YxeHmcp0yMza+IxSE85AMtOSPEy00RPbCrWkLNL0qN3+RA8PKSAEQSzP829TZbmE1Qu+drUKIbYpE0MdgTD5On4JVqjeNZNgYhZCh/S7g6+Po2+tLJJ4l4IzZBGAmBAvPjm7NxDYRKtpEDPLmbhbxoDfJ0wYyDmfxSfPpd0+crQpU0pbhNPqVW2TsiFs6Qpbt0tHa9VWhyDjpBqBMd9hubGASzeJjiGxy1uYVPIeBz3i0c1kWs8uc+uJjkSHDJQ9PiLedSoEGwsotUIxA6sT+AIKEmYhumHWQoLbP4hg1USj9JZCCp+KSrgx6Cvi9fkCoh+gpnZWVhuyRbGCj8S7VxxtiEk2SaHKLnuvFvbpWtOm0mguyzi2UCFl3CIsbE32LCEAWw0l3ho981lrtWNbKZTF1hammYcLr9MdZveHLI5RnYr58xUvyJzfPQhe7j6ZYdDQbDFhybashPvNplD7iqWRaZ8nxvaYZWPm9qsbyUbYc6QtSlUVrnt9LXgR7Z6zjM3z32oenqp0fexGoldXjUHJYduZyxODkAmW7DowXS1SqZ48fvtwsvNQB8pWm0g+rXVSl4o2tKoNg7rwT5m2HlJWL81bM6mfG2b/2G44KAshHko055FzT7A0FmTLBbSCX6IrOPa7DhgyxSdg7J3+CTiD0OCnten/islMjYnE/z2euRNh7yBuTO+XTWY1Z0k4Y8kHyRYf33LaNifH/pG7c+JmnumQaKyReEYwn9GvHMZN//q0ejnxe2D4dA3hrioKQncTWIMWMQM10YXO2FGVURFS24YhWBahMJeJ5RMWWvwcgjGrn+QDEymGXMkxRAM1Sm2c2ktjQI7Fxo/Xp0/XX/1xNjn7o9i9mbdoAWlybAFG6nPKRVTy7jdtuAvCeST3NrLCSwLCTZcl0rVWzwTK5etBDMqdjDuQsUAwM1IBm8Nubvs13FTM73E2TZg0OcY6392Vqbssn/8Dq00ail4LAAA=</value>[m
+[32m+[m[32m    <value>H4sIAAAAAAAEANVWyW7bMBC9F+g/CDy1h5rOckgDOUHqxK3bOg6iJNeClkY2US6qSBn2t/XQT+ovdGhZsix5S5BLbxI5y5vHN0P+/f3Hv5xJ4U0hNVyrDjlqtYkHKtQRV+MOyWz84YxcXrx9499EcuY9FXYnzg49lemQibXJOaUmnIBkpiV5mGqjY9sKtaQs0vS43f5Ij44oYAiCsTzPv8+U5RIWP/jb1SqExGZMDHQEwizXcSdYRPVumQSTsBA6pNftf/kx/NrKLYl3JThDFAGImHjJ6fmjgcCmWo2DhFnOxMM8AdyPmTCwxHyenB4Ku33sYFOmlLYYTqsXlU3KgrCkGyzdzh2sRVkdgojTu1THXEDVEE2/wXxtAZfQMIHUzu8hrrj3I+LRdV9ady5da34OSYf0lT05Jt5tJgQbCSgJQ0YDq1P4DApSZiG6Y9ZCihroR7CopJF5Qx73VWTC00FxEa/HZxB9BzW2kzLbgM2KFfwk3qPiqEV0smkGVXT5fzWxT1fENulGhVnGsYQKKOMWYWZrpOcOAdjm8aDcVklyzbWqp7cRUJl6pWqay7qQP92if3/AkgS5qvTDcsUL8mbofgieL0iZx6Ch2aDLEm2ZCU+fjaG2i6kRaY+nxl4zy0bMnV43kg2zQ4guUm3guy7/Ff2Fk/vOHdcnQ2trW1WJ7GFtEnW8KBNKRDuacukfhEywdEtLdbXIpNrVnvui5A1Tj5OvNiP5tFZOnTba4K02LOpnsUvHdZMye6nnmm79pYb2D/eGqHIT4iFFUx45QQVzY0G2nEEr+CW6gmO9K4MBUzwGYx/0T8AhhZo/q90RL5jf1JhI/AdDnDsm9o7rxox/3vxWU5aGE5a+k2z2/jVncnOiHDyY983lXEYdEo00lpHDfY3B3RS2T6tvG/8aDB+vQriXjoLQPSRWQQubvop1wT1WWUVUmNSOZgCWRUjWVWp5zEKL2yEYs7hen5jI0ORGjiDqq2Fmk8xeGQNyJNaubJ/uzr+4ndYx+8PE/ZnXKAFhciwBhupTxkVU4u41pbkthNPNUu+ICp8XGG48LyPdanVgoCV915CAct3yADIRGMwMVcCmsB3bfg7XGfOvORunTJpljJW/e2pT99a++Af/OWYznQsAAA==</value>[m
+   </data>[m
+ </root>[m
+\ No newline at end of file[m
+[1mdiff --git a/FCIH_OJ/Migrations/201611091933489_migration.Designer.cs b/FCIH_OJ/Migrations/201611091933489_migration.Designer.cs[m
+[1mnew file mode 100644[m
+[1mindex 0000000..ca45fa2[m
+[1m--- /dev/null[m
+[1m+++ b/FCIH_OJ/Migrations/201611091933489_migration.Designer.cs[m
+[36m@@ -0,0 +1,27 @@[m
+[32m+[m[32m// <auto-generated />[m
+[32m+[m[32mnamespace FCIH_OJ.Migrations[m
+[32m+[m[32m{[m
+[32m+[m[32m    using System.Data.Entity.Migrations;[m
+[32m+[m[32m    using System.Data.Entity.Migrations.Infrastructure;[m
+[32m+[m[32m    using System.Resources;[m
+[32m+[m[41m    [m
+[32m+[m[32m    public sealed partial class migration : IMigrationMetadata[m
+[32m+[m[32m    {[m
+[32m+[m[32m        private readonly ResourceManager Resources = new ResourceManager(typeof(migration));[m
+[32m+[m[41m        [m
+[32m+[m[32m        string IMigrationMetadata.Id[m
+[32m+[m[32m        {[m
+[32m+[m[32m            get { return "201611091933489_migration"; }[m
+[32m+[m[32m        }[m
+[32m+[m[41m        [m
+[32m+[m[32m        string IMigrationMetadata.Source[m
+[32m+[m[32m        {[m
+[32m+[m[32m            get { return Resources.GetString("Source"); }[m
+[32m+[m[32m        }[m
+[32m+[m[41m        [m
+[32m+[m[32m        string IMigrationMetadata.Target[m
+[32m+[m[32m        {[m
+[32m+[m[32m            get { return Resources.GetString("Target"); }[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m[32m}[m
+[1mdiff --git a/FCIH_OJ/Migrations/201611022321289_Initial.cs b/FCIH_OJ/Migrations/201611091933489_migration.cs[m
+[1msimilarity index 82%[m
+[1mrename from FCIH_OJ/Migrations/201611022321289_Initial.cs[m
+[1mrename to FCIH_OJ/Migrations/201611091933489_migration.cs[m
+[1mindex aba5b65..7bb9225 100644[m
+[1m--- a/FCIH_OJ/Migrations/201611022321289_Initial.cs[m
+[1m+++ b/FCIH_OJ/Migrations/201611091933489_migration.cs[m
+[36m@@ -3,7 +3,7 @@[m [mnamespace FCIH_OJ.Migrations[m
+     using System;[m
+     using System.Data.Entity.Migrations;[m
+     [m
+[31m-    public partial class Initial : DbMigration[m
+[32m+[m[32m    public partial class migration : DbMigration[m
+     {[m
+         public override void Up()[m
+         {[m
+[1mdiff --git a/FCIH_OJ/Migrations/201611091933489_migration.resx b/FCIH_OJ/Migrations/201611091933489_migration.resx[m
+[1mnew file mode 100644[m
+[1mindex 0000000..0adff52[m
+[1m--- /dev/null[m
+[1m+++ b/FCIH_OJ/Migrations/201611091933489_migration.resx[m
+[36m@@ -0,0 +1,126 @@[m
+[32m+[m[32m﻿<?xml version="1.0" encoding="utf-8"?>[m
+[32m+[m[32m<root>[m
+[32m+[m[32m  <!--[m[41m [m
+[32m+[m[32m    Microsoft ResX Schema[m[41m [m
+[32m+[m[41m    [m
+[32m+[m[32m    Version 2.0[m
+[32m+[m[41m    [m
+[32m+[m[32m    The primary goals of this format is to allow a simple XML format[m[41m [m
+[32m+[m[32m    that is mostly human readable. The generation and parsing of the[m[41m [m
+[32m+[m[32m    various data types are done through the TypeConverter classes[m[41m [m
+[32m+[m[32m    associated with the data types.[m
+[32m+[m[41m    [m
+[32m+[m[32m    Example:[m
+[32m+[m[41m    [m
+[32m+[m[32m    ... ado.net/XML headers & schema ...[m
+[32m+[m[32m    <resheader name="resmimetype">text/microsoft-resx</resheader>[m
+[32m+[m[32m    <resheader name="version">2.0</resheader>[m
+[32m+[m[32m    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>[m
+[32m+[m[32m    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>[m
+[32m+[m[32m    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>[m
+[32m+[m[32m    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>[m
+[32m+[m[32m    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">[m
+[32m+[m[32m        <value>[base64 mime encoded serialized .NET Framework object]</value>[m
+[32m+[m[32m    </data>[m
+[32m+[m[32m    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">[m
+[32m+[m[32m        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>[m
+[32m+[m[32m        <comment>This is a comment</comment>[m
+[32m+[m[32m    </data>[m
+[32m+[m[41m                [m
+[32m+[m[32m    There are any number of "resheader" rows that contain simple[m[41m [m
+[32m+[m[32m    name/value pairs.[m
+[32m+[m[41m    [m
+[32m+[m[32m    Each data row contains a name, and value. The row also contains a[m[41m [m
+[32m+[m[32m    type or mimetype. Type corresponds to a .NET class that support[m[41m [m
+[32m+[m[32m    text/value conversion through the TypeConverter architecture.[m[41m [m
+[32m+[m[32m    Classes that don't support this are serialized and stored with the[m[41m [m
+[32m+[m[32m    mimetype set.[m
+[32m+[m[41m    [m
+[32m+[m[32m    The mimetype is used for serialized objects, and tells the[m[41m [m
+[32m+[m[32m    ResXResourceReader how to depersist the object. This is currently not[m[41m [m
+[32m+[m[32m    extensible. For a given mimetype the value must be set accordingly:[m
+[32m+[m[41m    [m
+[32m+[m[32m    Note - application/x-microsoft.net.object.binary.base64 is the format[m[41m [m
+[32m+[m[32m    that the ResXResourceWriter will generate, however the reader can[m[41m [m
+[32m+[m[32m    read any of the formats listed below.[m
+[32m+[m[41m    [m
+[32m+[m[32m    mimetype: application/x-microsoft.net.object.binary.base64[m
+[32m+[m[32m    value   : The object must be serialized with[m[41m [m
+[32m+[m[32m            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter[m
+[32m+[m[32m            : and then encoded with base64 encoding.[m
+[32m+[m[41m    [m
+[32m+[m[32m    mimetype: application/x-microsoft.net.object.soap.base64[m
+[32m+[m[32m    value   : The object must be serialized with[m[41m [m
+[32m+[m[32m            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter[m
+[32m+[m[32m            : and then encoded with base64 encoding.[m
+[32m+[m
+[32m+[m[32m    mimetype: application/x-microsoft.net.object.bytearray.base64[m
+[32m+[m[32m    value   : The object must be serialized into a byte array[m[41m [m
+[32m+[m[32m            : using a System.ComponentModel.TypeConverter[m
+[32m+[m[32m            : and then encoded with base64 encoding.[m
+[32m+[m[32m    -->[m
+[32m+[m[32m  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">[m
+[32m+[m[32m    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />[m
+[32m+[m[32m    <xsd:element name="root" msdata:IsDataSet="true">[m
+[32m+[m[32m      <xsd:complexType>[m
+[32m+[m[32m        <xsd:choice maxOccurs="unbounded">[m
+[32m+[m[32m          <xsd:element name="metadata">[m
+[32m+[m[32m            <xsd:complexType>[m
+[32m+[m[32m              <xsd:sequence>[m
+[32m+[m[32m                <xsd:element name="value" type="xsd:string" minOccurs="0" />[m
+[32m+[m[32m              </xsd:sequence>[m
+[32m+[m[32m              <xsd:attribute name="name" use="required" type="xsd:string" />[m
+[32m+[m[32m              <xsd:attribute name="type" type="xsd:string" />[m
+[32m+[m[32m              <xsd:attribute name="mimetype" type="xsd:string" />[m
+[32m+[m[32m              <xsd:attribute ref="xml:space" />[m
+[32m+[m[32m            </xsd:complexType>[m
+[32m+[m[32m          </xsd:element>[m
+[32m+[m[32m          <xsd:element name="assembly">[m
+[32m+[m[32m            <xsd:complexType>[m
+[32m+[m[32m              <xsd:attribute name="alias" type="xsd:string" />[m
+[32m+[m[32m              <xsd:attribute name="name" type="xsd:string" />[m
+[32m+[m[32m            </xsd:complexType>[m
+[32m+[m[32m          </xsd:element>[m
+[32m+[m[32m          <xsd:element name="data">[m
+[32m+[m[32m            <xsd:complexType>[m
+[32m+[m[32m              <xsd:sequence>[m
+[32m+[m[32m                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />[m
+[32m+[m[32m                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />[m
+[32m+[m[32m              </xsd:sequence>[m
+[32m+[m[32m              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />[m
+[32m+[m[32m              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />[m
+[32m+[m[32m              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />[m
+[32m+[m[32m              <xsd:attribute ref="xml:space" />[m
+[32m+[m[32m            </xsd:complexType>[m
+[32m+[m[32m          </xsd:element>[m
+[32m+[m[32m          <xsd:element name="resheader">[m
+[32m+[m[32m            <xsd:complexType>[m
+[32m+[m[32m              <xsd:sequence>[m
+[32m+[m[32m                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />[m
+[32m+[m[32m              </xsd:sequence>[m
+[32m+[m[32m              <xsd:attribute name="name" type="xsd:string" use="required" />[m
+[32m+[m[32m            </xsd:complexType>[m
+[32m+[m[32m          </xsd:element>[m
+[32m+[m[32m        </xsd:choice>[m
+[32m+[m[32m      </xsd:complexType>[m
+[32m+[m[32m    </xsd:element>[m
+[32m+[m[32m  </xsd:schema>[m
+[32m+[m[32m  <resheader name="resmimetype">[m
+[32m+[m[32m    <value>text/microsoft-resx</value>[m
+[32m+[m[32m  </resheader>[m
+[32m+[m[32m  <resheader name="version">[m
+[32m+[m[32m    <value>2.0</value>[m
+[32m+[m[32m  </resheader>[m
+[32m+[m[32m  <resheader name="reader">[m
+[32m+[m[32m    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>[m
+[32m+[m[32m  </resheader>[m
+[32m+[m[32m  <resheader name="writer">[m
+[32m+[m[32m    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>[m
+[32m+[m[32m  </resheader>[m
+[32m+[m[32m  <data name="Source" xml:space="preserve">[m
+[32m+[m[32m    <value>H4sIAAAAAAAEANVXzXLbNhC+d6bvwMGpPUSwnRxSD5WMK1ut2sryhE6unRW5lDHFD0uArvRsPfSR8gpZiL8irR8naWd6I8Hdb79d7IcFP/79T/h2rWTwiLkVRo/Z+eiMBahjkwi9GrPCpS9es7dvvv0mvEnUOvhQ2730duSp7Zg9OJddcm7jB1RgR0rEubEmdaPYKA6J4RdnZz/w83OOBMEIKwjCd4V2QuH2hV4nRseYuQLk3CQobbVOX6ItanALCm0GMY7ZdDL7+ffFL6PSkgVXUgCxiFCmLMheXb63GLnc6FWUgRMg7zcZ0vcUpMWK82X26lTaZxeeNgetjSM4oz8rbdYkRCndUOpu42lt0xozYpzf5SYVEruGZPorbnYWaIkMM8zd5h2mHfdZwgK+68v7zo1rz88zGbOZdi8vWHBbSAlLiU3BqKKRMzn+hBpzcJjcgXOYUw/MEtxmMoj8RBz/VEei3aHmYsFUrDH5DfXKPTTR5rCuV+iRBe+1oF4kJ5cX2GVXvh8OfAfW/mXy5D8PfKNAyH85asjbPhp2FwnKgaAd6+yB9Yu4dr0eKx0idMNuJHW1QUqJjbrN+iShJnQrYl6quFY73yP3cA5ZRrXqyL9aCaJS+5MX0fP1p0oMHtsnZNiwbSJRs8MKe18pNDGdity6a3CwBL97k0QNzE4pdB3qiXr31d6Wv3byz6Xj7kE42nuKdAs5pdwUyXabJjaMDpxBlX8Ug4R8zwkyMbJQ+tBpdAylPB/6OOXq6Uit4LtI7erpSJWCuzDV0hAj5L3i9jeRD3axd1L3O+OQqvomTfRGXT0VhVVHH5+sgxYvTVhAxXkUiW/vaGMdqpE3GEV/yokUlG9rMActUrTu3vyBNCFIga97A/ozhie3NpH/gwkqfCWOzsrBgH3e8NSPkMcPkH+nYP39lw7ELwLbGXLPQHre4BoeuydPr2PDq+zuMUuWhtIo6X6N6TbUW8i7993wGq1YtRD+9qsx9pfLFrS2menU1IWnLLuMapPevszRQULFusqdSCF29DlGa7d3kA8gi+3WLTGZ6UXhssJdWYtqKXeucSE/HH87wnc5h4vMv9mvkQLRFJQCLvSPhZBJw3s6VMw+CN83lQyJFd3BCG61aZBujT4RqCrfNWaovYjvUWWSwOxCR/CI+7kdr+FuxcJrAasclK0wWn//+8X9/9ebT7GkUYuxDQAA</value>[m
+[32m+[m[32m  </data>[m
+[32m+[m[32m  <data name="Target" xml:space="preserve">[m
+[32m+[m[32m    <value>H4sIAAAAAAAEANVXzXLbNhC+d6bvwMGpPUSwnRxSD5WMK1ut2sryhE6unRW5lDHFD0uArvRsPfSR8gpZiL8irR8naWd6I8Hdb79d7IcFP/79T/h2rWTwiLkVRo/Z+eiMBahjkwi9GrPCpS9es7dvvv0mvEnUOvhQ2730duSp7Zg9OJddcm7jB1RgR0rEubEmdaPYKA6J4RdnZz/w83OOBMEIKwjCd4V2QuH2hV4nRseYuQLk3CQobbVOX6ItanALCm0GMY7ZdDL7+ffFL6PSkgVXUgCxiFCmLMheXb63GLnc6FWUgRMg7zcZ0vcUpMWK82X26lTaZxeeNgetjSM4oz8rbdYkRCndUOpu42lt0xozYpzf5SYVEruGZPorbnYWaIkMM8zd5h2mHfdZwgK+68v7zo1rz88zGbOZdi8vWHBbSAlLiU3BqKKRMzn+hBpzcJjcgXOYUw/MEtxmMoj8RBz/VEei3aHmYsFUrDH5DfXKPTTR5rCuV+iRBe+1oF4kJ5cX2GVXvh8OfAfW/mXy5D8PfKNAyH85asjbPhp2FwnKgaAd6+yB9Yu4dr0eKx0idMNuJHW1QUqJjbrN+iShJnQrYl6quFY73yP3cA5ZRrXqyL9aCaJS+5MX0fP1p0oMHtsnZNiwbSJRs8MKe18pNDGdity6a3CwBL97k0QNzE4pdB3qiXr31d6Wv3byz6Xj7kE42nuKdAs5pdwUyXabJjaMDpxBlX8Ug4R8zwkyMbJQ+tBpdAylPB/6OOXq6Uit4LtI7erpSJWCuzDV0hAj5L3i9jeRD3axd1L3O+OQqvomTfRGXT0VhVVHH5+sgxYvTVhAxXkUiW/vaGMdqpE3GEV/yokUlG9rMActUrTu3vyBNCFIga97A/ozhie3NpH/gwkqfCWOzsrBgH3e8NSPkMcPkH+nYP39lw7ELwLbGXLPQHre4BoeuydPr2PDq+zuMUuWhtIo6X6N6TbUW8i7993wGq1YtRD+9qsx9pfLFrS2menU1IWnLLuMapPevszRQULFusqdSCF29DlGa7d3kA8gi+3WLTGZ6UXhssJdWYtqKXeucSE/HH87wnc5h4vMv9mvkQLRFJQCLvSPhZBJw3s6VMw+CN83lQyJFd3BCG61aZBujT4RqCrfNWaovYjvUWWSwOxCR/CI+7kdr+FuxcJrAasclK0wWn//+8X9/9ebT7GkUYuxDQAA</value>[m
+[32m+[m[32m  </data>[m
+[32m+[m[32m</root>[m
+\ No newline at end of file[m
+[1mdiff --git a/FCIH_OJ/Migrations/Configuration.cs b/FCIH_OJ/Migrations/Configuration.cs[m
+[1mindex 047f262..0895b3c 100644[m
+[1m--- a/FCIH_OJ/Migrations/Configuration.cs[m
+[1m+++ b/FCIH_OJ/Migrations/Configuration.cs[m
+[36m@@ -5,6 +5,8 @@[m [mnamespace FCIH_OJ.Migrations[m
+     using System.Data.Entity;[m
+     using System.Data.Entity.Migrations;[m
+     using System.Linq;[m
+[32m+[m[32m    using System.Web.Security;[m
+[32m+[m[32m    using WebMatrix.WebData;[m
+ [m
+     internal sealed class Configuration : DbMigrationsConfiguration<FCIH_OJ.Models.UsersContext>[m
+     {[m
+[36m@@ -22,13 +24,34 @@[m [mnamespace FCIH_OJ.Migrations[m
+             //  to avoid creating duplicate seed data. E.g.[m
+             //[m
+ [m
+[31m-            context.Users.AddOrUpdate([m
+[31m-                p => p.Username,[m
+[31m-                new User { [m
+[31m-                    Username = "root" ,[m
+[31m-                    Email = "root@root.com"[m
+[31m-                }[m
+[31m-            );[m
+[32m+[m[32m            //////////////////////////////////////////////////////[m
+[32m+[m[32m            // user module[m
+[32m+[m
+[32m+[m[32m            WebSecurity.InitializeDatabaseConnection("DefaultConnection", "UserProfile", "UserId", "UserName", autoCreateTables: true);[m
+[32m+[m
+[32m+[m[32m            SimpleRoleProvider roles = new SimpleRoleProvider(Roles.Provider);[m
+[32m+[m[32m            SimpleMembershipProvider membership = new SimpleMembershipProvider(Membership.Provider);[m
+[32m+[m[41m            [m
+[32m+[m[32m            if (!roles.RoleExists("admin"))[m
+[32m+[m[32m            {[m
+[32m+[m[32m                roles.CreateRole("admin");[m
+[32m+[m[32m            }[m
+[32m+[m[32m            if (!WebSecurity.UserExists("admin"))[m
+[32m+[m[32m            {[m
+[32m+[m[32m                WebSecurity.CreateUserAndAccount("admin", "admin", new {[m
+[32m+[m[32m                    Email = "admin@admin.com" ,[m
+[32m+[m[32m                    Password = "admin"[m
+[32m+[m[32m                });[m
+[32m+[m[32m            }[m
+[32m+[m[32m            if (!roles.GetRolesForUser("admin").Contains("admin"))[m
+[32m+[m[32m            {[m
+[32m+[m[32m                roles.AddUsersToRoles(new[] { "admin" }, new[] { "admin" });[m
+[32m+[m[32m            }[m[41m [m
+[32m+[m[32m            //end of user module[m
+[32m+[m[32m            //////////////////////////////////////////////////////[m
+[32m+[m[32m            //other modules[m
+[32m+[m
+[32m+[m
+         }[m
+     }[m
+ }[m
+[1mdiff --git a/FCIH_OJ/Models/AccountModels.cs b/FCIH_OJ/Models/AccountModels.cs[m
+[1mnew file mode 100644[m
+[1mindex 0000000..4420680[m
+[1m--- /dev/null[m
+[1m+++ b/FCIH_OJ/Models/AccountModels.cs[m
+[36m@@ -0,0 +1,186 @@[m
+[32m+[m[32m﻿using FCIH_OJ.Validations;[m
+[32m+[m[32musing System;[m
+[32m+[m[32musing System.Collections.Generic;[m
+[32m+[m[32musing System.ComponentModel.DataAnnotations;[m
+[32m+[m[32musing System.ComponentModel.DataAnnotations.Schema;[m
+[32m+[m[32musing System.Data;[m
+[32m+[m[32musing System.Data.Entity;[m
+[32m+[m[32musing System.Globalization;[m
+[32m+[m[32musing System.Web;[m
+[32m+[m[32musing System.Web.Security;[m
+[32m+[m[32musing WebMatrix.WebData;[m
+[32m+[m
+[32m+[m[32mnamespace FCIH_OJ.Models[m
+[32m+[m[32m{[m
+[32m+[m[32m    public class UsersContext : DbContext[m
+[32m+[m[32m    {[m
+[32m+[m[32m        public UsersContext()[m
+[32m+[m[32m            : base("DefaultConnection")[m
+[32m+[m[32m        {[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        public DbSet<UserProfile> UserProfiles { get; set; }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    [Table("UserProfile")][m
+[32m+[m[32m    public class UserProfile[m
+[32m+[m[32m    {[m
+[32m+[m[32m        [Key][m
+[32m+[m[32m        [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)][m
+[32m+[m[32m        public int UserId { get; set; }[m
+[32m+[m[32m        public string UserName { get; set; }[m
+[32m+[m[32m        public string Password { get; set; }[m
+[32m+[m[32m        public string Email { get; set; }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    public class LoginModel[m
+[32m+[m[32m    {[m
+[32m+[m[32m        [Required][m
+[32m+[m[32m        [Display(Name = "User name")][m
+[32m+[m[32m        public string UserName { get; set; }[m
+[32m+[m
+[32m+[m[32m        [Required][m
+[32m+[m[32m        [DataType(DataType.Password)][m
+[32m+[m[32m        [Display(Name = "Password")][m
+[32m+[m[32m        public string Password { get; set; }[m
+[32m+[m
+[32m+[m[32m        [Display(Name = "Remember me?")][m
+[32m+[m[32m        public bool RememberMe { get; set; }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    public class RegisterModel[m
+[32m+[m[32m    {[m
+[32m+[m[32m        [Required][m
+[32m+[m[32m        [Display(Name = "UserName")][m
+[32m+[m[32m        [Unique(ErrorMessage = "This UserName already taken.")][m
+[32m+[m[32m        public string UserName { get; set; }[m
+[32m+[m
+[32m+[m[32m        [Required][m
+[32m+[m[32m        [Display(Name = "Email")][m
+[32m+[m[32m        [EmailAddress][m
+[32m+[m[32m        public string Email { get; set; }[m
+[32m+[m
+[32m+[m[32m        [Required][m
+[32m+[m[32m        [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)][m
+[32m+[m[32m        [DataType(DataType.Password)][m
+[32m+[m[32m        [Display(Name = "Password")][m
+[32m+[m[32m        public string Password { get; set; }[m
+[32m+[m
+[32m+[m[32m        [DataType(DataType.Password)][m
+[32m+[m[32m        [Display(Name = "Confirm password")][m
+[32m+[m[32m        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")][m
+[32m+[m[32m        public string ConfirmPassword { get; set; }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    public class EditProfileModel[m
+[32m+[m[32m    {[m
+[32m+[m[32m        public int UserId { get; set; }[m
+[32m+[m[32m        public string UserName { get; set; }[m
+[32m+[m
+[32m+[m[32m        [Display(Name = "Email")][m
+[32m+[m[32m        [EmailAddress][m
+[32m+[m[32m        public string Email { get; set; }[m
+[32m+[m
+[32m+[m[32m        [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)][m
+[32m+[m[32m        [DataType(DataType.Password)][m
+[32m+[m[32m        [Display(Name = "New Password")][m
+[32m+[m[32m        public string NewPassword { get; set; }[m
+[32m+[m
+[32m+[m[32m        [DataType(DataType.Password)][m
+[32m+[m[32m        [Display(Name = "Confirm password")][m
+[32m+[m[32m        [Compare("NewPassword", ErrorMessage = "The password and confirmation password do not match.")][m
+[32m+[m[32m        public string ConfirmPassword { get; set; }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    public class AdminUserProfile[m
+[32m+[m[32m    {[m
+[32m+[m[32m        public int UserId { get; set; }[m
+[32m+[m[32m        public string UserName { get; set; }[m
+[32m+[m
+[32m+[m[32m        [Display(Name = "Email")][m
+[32m+[m[32m        [EmailAddress][m
+[32m+[m[32m        public string Email { get; set; }[m
+[32m+[m
+[32m+[m[32m        [DataType(DataType.Password)][m
+[32m+[m[32m        [Display(Name = "New Password")][m
+[32m+[m[32m        public string NewPassword { get; set; }[m
+[32m+[m
+[32m+[m[32m        [Display(Name = "Roles")][m
+[32m+[m[32m        public string[] Roles { get; set; }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    //manager class[m
+[32m+[m[32m    public class UserManager[m
+[32m+[m[32m    {[m
+[32m+[m[32m        private static UsersContext UsersContext = new UsersContext();[m
+[32m+[m
+[32m+[m[32m        public static bool Register(RegisterModel RegisteredUser)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            UserProfile user = new UserProfile();[m
+[32m+[m[32m            user.UserName = RegisteredUser.UserName;[m
+[32m+[m[32m            user.Password = RegisteredUser.Password;[m
+[32m+[m[32m            user.Email = RegisteredUser.Email;[m
+[32m+[m[32m            WebSecurity.CreateUserAndAccount(RegisteredUser.UserName, RegisteredUser.Password, new {[m
+[32m+[m[32m                Email = RegisteredUser.Email ,[m
+[32m+[m[32m                Password = RegisteredUser.Password[m
+[32m+[m[32m            });[m
+[32m+[m
+[32m+[m[32m            return true;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        public static bool Login(string UserName, string Password)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            return WebSecurity.Login(UserName, Password); ;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        public static void Logout()[m
+[32m+[m[32m        {[m
+[32m+[m[32m            WebSecurity.Logout();[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        public static bool EditUser(EditProfileModel NewUserProfile)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            bool changed = true;[m
+[32m+[m[32m            MembershipUser Membershipuser = Membership.GetUser(NewUserProfile.UserName);[m
+[32m+[m[32m            UserProfile Userprofile = UserManager.GetUserById(NewUserProfile.UserId);[m
+[32m+[m[32m            if (NewUserProfile.NewPassword != null)[m
+[32m+[m[32m            {[m
+[32m+[m[32m                changed = WebSecurity.ChangePassword(Userprofile.UserName, Userprofile.Password, NewUserProfile.NewPassword);[m
+[32m+[m[32m                Userprofile.Password = NewUserProfile.NewPassword;[m
+[32m+[m[32m            }[m
+[32m+[m
+[32m+[m[32m            Userprofile.UserName = NewUserProfile.UserName;[m
+[32m+[m[32m            Userprofile.Email = NewUserProfile.Email;[m
+[32m+[m[32m            // other fields[m
+[32m+[m[32m            // Userprofile.Image = NewUserProfile.Image;[m
+[32m+[m[32m            // Membership.UpdateUser(Membershipuser);[m
+[32m+[m
+[32m+[m[32m            UsersContext.UserProfiles.Attach(Userprofile);[m
+[32m+[m[32m            UsersContext.Entry(Userprofile).State = EntityState.Modified;[m
+[32m+[m[32m            UsersContext.SaveChanges();[m
+[32m+[m
+[32m+[m
+[32m+[m[32m            return changed;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        public static UserProfile GetUserById(int ID)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            return UsersContext.UserProfiles.Find(ID);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        public static string[] GetRolesByUserId(string UserName)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            return Roles.GetRolesForUser(UserName);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        public static void DeleteUserByUserName(string UserName)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            if (Roles.GetRolesForUser(UserName).Length != 0)[m
+[32m+[m[32m            {[m
+[32m+[m[32m                Roles.RemoveUserFromRoles(UserName, Roles.GetRolesForUser(UserName));[m
+[32m+[m[32m            }[m
+[32m+[m[32m            ((SimpleMembershipProvider)Membership.Provider).DeleteAccount(UserName); // deletes record from webpages_Membership table[m
+[32m+[m[32m            ((SimpleMembershipProvider)Membership.Provider).DeleteUser(UserName, true); // deletes record from UserProfile table[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m[32m}[m
+[1mdiff --git a/FCIH_OJ/Models/UserModels.cs b/FCIH_OJ/Models/UserModels.cs[m
+[1mdeleted file mode 100644[m
+[1mindex cc4a826..0000000[m
+[1m--- a/FCIH_OJ/Models/UserModels.cs[m
+[1m+++ /dev/null[m
+[36m@@ -1,30 +0,0 @@[m
+[31m-﻿using System;[m
+[31m-using System.Collections.Generic;[m
+[31m-using System.ComponentModel.DataAnnotations;[m
+[31m-using System.ComponentModel.DataAnnotations.Schema;[m
+[31m-using System.Data.Entity;[m
+[31m-using System.Globalization;[m
+[31m-using System.Web.Security;[m
+[31m-[m
+[31m-namespace FCIH_OJ.Models[m
+[31m-{[m
+[31m-    public class UsersContext : DbContext[m
+[31m-    {[m
+[31m-        public UsersContext()[m
+[31m-            : base("DefaultConnection")[m
+[31m-        {[m
+[31m-        }[m
+[31m-[m
+[31m-        public DbSet<User> Users { get; set; }[m
+[31m-    }[m
+[31m-[m
+[31m-    [Table("Users")][m
+[31m-    public class User[m
+[31m-    {[m
+[31m-        [Key][m
+[31m-        [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)][m
+[31m-        public int User_ID { get; set; }[m
+[31m-        public string Username { get; set; }[m
+[31m-        public string Email { get; set; }[m
+[31m-    }[m
+[31m-}[m
+[1mdiff --git a/FCIH_OJ/Properties/AssemblyInfo.cs b/FCIH_OJ/Properties/AssemblyInfo.cs[m
+[1mindex 4bf3dc3..2f5be0a 100644[m
+[1m--- a/FCIH_OJ/Properties/AssemblyInfo.cs[m
+[1m+++ b/FCIH_OJ/Properties/AssemblyInfo.cs[m
+[36m@@ -20,7 +20,7 @@[m [musing System.Runtime.InteropServices;[m
+ [assembly: ComVisible(false)][m
+ [m
+ // The following GUID is for the ID of the typelib if this project is exposed to COM[m
+[31m-[assembly: Guid("908500b8-be2f-4fcc-85cf-cdc764becaba")][m
+[32m+[m[32m[assembly: Guid("3835e4d8-d3de-4a7b-b0e1-ff452e85cff5")][m
+ [m
+ // Version information for an assembly consists of the following four values:[m
+ //[m
+[1mdiff --git a/FCIH_OJ/Validations/Validations.cs b/FCIH_OJ/Validations/Validations.cs[m
+[1mnew file mode 100644[m
+[1mindex 0000000..01a40a0[m
+[1m--- /dev/null[m
+[1m+++ b/FCIH_OJ/Validations/Validations.cs[m
+[36m@@ -0,0 +1,51 @@[m
+[32m+[m[32m﻿using System;[m
+[32m+[m[32musing System.Collections.Generic;[m
+[32m+[m[32musing System.ComponentModel.DataAnnotations;[m
+[32m+[m[32musing System.Linq;[m
+[32m+[m[32musing System.Text;[m
+[32m+[m[32musing FCIH_OJ.Models;[m
+[32m+[m[32musing WebMatrix.WebData;[m
+[32m+[m[32musing System.Web.Security;[m
+[32m+[m[32musing System.Web.Mvc;[m
+[32m+[m[32musing System.Web;[m
+[32m+[m
+[32m+[m[32mnamespace FCIH_OJ.Validations[m
+[32m+[m[32m{[m
+[32m+[m[32m    public class Unique : ValidationAttribute[m
+[32m+[m[32m    {[m
+[32m+[m[32m        UsersContext UsersContext = new UsersContext();[m
+[32m+[m[32m        private const string DefaultErrorMessage = "Not Unique";[m
+[32m+[m
+[32m+[m[32m        protected override ValidationResult IsValid(object value, ValidationContext validationContext)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            //if field not empty[m
+[32m+[m[32m            if (value != null)[m
+[32m+[m[32m            {[m
+[32m+[m[32m                // if the field is user username or user email[m
+[32m+[m[32m                if (validationContext.DisplayName == "UserName" || validationContext.DisplayName == "Email")[m
+[32m+[m[32m                {[m
+[32m+[m[32m                    // fetch results where email or username equals the value[m
+[32m+[m[32m                    var results = UsersContext.UserProfiles.Where(a => a.UserName == value || a.Email == value).SingleOrDefault();[m
+[32m+[m
+[32m+[m[32m                    // if not empty resutls throw exception with error message[m[41m [m
+[32m+[m[32m                    if (results != null)[m
+[32m+[m[32m                        return new ValidationResult(ErrorMessage ?? DefaultErrorMessage);[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m
+[32m+[m[32m            return ValidationResult.Success;[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    public class AnonymousOnly : AuthorizeAttribute[m
+[32m+[m[32m    {[m
+[32m+[m[32m        // Custom property[m
+[32m+[m[32m        public string AccessLevel { get; set; }[m
+[32m+[m
+[32m+[m[32m        protected override bool AuthorizeCore(HttpContextBase httpContext)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            return !httpContext.User.Identity.IsAuthenticated;[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m}[m
+[1mdiff --git a/FCIH_OJ/Views/User/Login.cshtml b/FCIH_OJ/Views/Account/Login.cshtml[m
+[1msimilarity index 82%[m
+[1mrename from FCIH_OJ/Views/User/Login.cshtml[m
+[1mrename to FCIH_OJ/Views/Account/Login.cshtml[m
+[1mindex f64606a..7c18719 100644[m
+[1m--- a/FCIH_OJ/Views/User/Login.cshtml[m
+[1m+++ b/FCIH_OJ/Views/Account/Login.cshtml[m
+[36m@@ -27,10 +27,12 @@[m
+                 @Html.PasswordFor(m => m.Password)[m
+                 @Html.ValidationMessageFor(m => m.Password)[m
+             </li>[m
+[32m+[m[32m            @*[m
+             <li>[m
+                 @Html.CheckBoxFor(m => m.RememberMe)[m
+                 @Html.LabelFor(m => m.RememberMe, new { @class = "checkbox" })[m
+             </li>[m
+[32m+[m[32m            *@[m
+         </ol>[m
+         <input type="submit" value="Log in" />[m
+     </fieldset>[m
+[36m@@ -39,12 +41,3 @@[m
+     </p>[m
+ }[m
+ </section>[m
+[31m-[m
+[31m-<section class="social" id="socialLoginForm">[m
+[31m-    <h2>Use another service to log in.</h2>[m
+[31m-    @Html.Action("ExternalLoginsList", new { ReturnUrl = ViewBag.ReturnUrl })[m
+[31m-</section>[m
+[31m-[m
+[31m-@section Scripts {[m
+[31m-    @Scripts.Render("~/bundles/jqueryval")[m
+[31m-}[m
+[1mdiff --git a/FCIH_OJ/Views/User/_ChangePasswordPartial.cshtml b/FCIH_OJ/Views/Account/Manage.cshtml[m
+[1msimilarity index 56%[m
+[1mrename from FCIH_OJ/Views/User/_ChangePasswordPartial.cshtml[m
+[1mrename to FCIH_OJ/Views/Account/Manage.cshtml[m
+[1mindex e1a327b..4d60304 100644[m
+[1m--- a/FCIH_OJ/Views/User/_ChangePasswordPartial.cshtml[m
+[1m+++ b/FCIH_OJ/Views/Account/Manage.cshtml[m
+[36m@@ -1,19 +1,24 @@[m
+[31m-﻿@model FCIH_OJ.Models.LocalPasswordModel[m
+[32m+[m[32m﻿@model FCIH_OJ.Models.EditProfileModel[m
+[32m+[m[32m@{[m
+[32m+[m[32m    ViewBag.Title = "Manage Account";[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m<hgroup class="title">[m
+[32m+[m[32m    <h1>@ViewBag.Title.</h1>[m
+[32m+[m[32m</hgroup>[m
+ [m
+[31m-<h3>Change password</h3>[m
+[32m+[m[32m<p class="message-success">@ViewBag.StatusMessage</p>[m
+[32m+[m
+[32m+[m[32m<p>You're logged in as <strong>@User.Identity.Name</strong>.</p>[m
+ [m
+ @using (Html.BeginForm("Manage", "Account")) {[m
+     @Html.AntiForgeryToken()[m
+     @Html.ValidationSummary()[m
+[31m-[m
+[32m+[m[41m    [m
+     <fieldset>[m
+[31m-        <legend>Change Password Form</legend>[m
+[32m+[m[32m        <legend>Edit Profile</legend>[m
+         <ol>[m
+             <li>[m
+[31m-                @Html.LabelFor(m => m.OldPassword)[m
+[31m-                @Html.PasswordFor(m => m.OldPassword)[m
+[31m-            </li>[m
+[31m-            <li>[m
+                 @Html.LabelFor(m => m.NewPassword)[m
+                 @Html.PasswordFor(m => m.NewPassword)[m
+             </li>[m
+[36m@@ -22,6 +27,6 @@[m
+                 @Html.PasswordFor(m => m.ConfirmPassword)[m
+             </li>[m
+         </ol>[m
+[31m-        <input type="submit" value="Change password" />[m
+[32m+[m[32m        <input type="submit" value="Save" />[m
+     </fieldset>[m
+[31m-}[m
+[32m+[m[32m}[m
+\ No newline at end of file[m
+[1mdiff --git a/FCIH_OJ/Views/User/Register.cshtml b/FCIH_OJ/Views/Account/Register.cshtml[m
+[1msimilarity index 86%[m
+[1mrename from FCIH_OJ/Views/User/Register.cshtml[m
+[1mrename to FCIH_OJ/Views/Account/Register.cshtml[m
+[1mindex 43b9436..eaada2e 100644[m
+[1m--- a/FCIH_OJ/Views/User/Register.cshtml[m
+[1m+++ b/FCIH_OJ/Views/Account/Register.cshtml[m
+[36m@@ -20,6 +20,10 @@[m
+                 @Html.TextBoxFor(m => m.UserName)[m
+             </li>[m
+             <li>[m
+[32m+[m[32m                @Html.LabelFor(m => m.Email)[m
+[32m+[m[32m                @Html.TextBoxFor(m => m.Email)[m
+[32m+[m[32m            </li>[m
+[32m+[m[32m            <li>[m
+                 @Html.LabelFor(m => m.Password)[m
+                 @Html.PasswordFor(m => m.Password)[m
+             </li>[m
+[36m@@ -31,7 +35,3 @@[m
+         <input type="submit" value="Register" />[m
+     </fieldset>[m
+ }[m
+[31m-[m
+[31m-@section Scripts {[m
+[31m-    @Scripts.Render("~/bundles/jqueryval")[m
+[31m-}[m
+[1mdiff --git a/FCIH_OJ/Views/Account/View.cshtml b/FCIH_OJ/Views/Account/View.cshtml[m
+[1mnew file mode 100644[m
+[1mindex 0000000..358f553[m
+[1m--- /dev/null[m
+[1m+++ b/FCIH_OJ/Views/Account/View.cshtml[m
+[36m@@ -0,0 +1,27 @@[m
+[32m+[m[32m﻿@model FCIH_OJ.Models.UserProfile[m
+[32m+[m
+[32m+[m[32m@{[m
+[32m+[m[32m    ViewBag.Title = "View Profile";[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m<h2>View Profile</h2>[m
+[32m+[m
+[32m+[m[32m<fieldset>[m
+[32m+[m[32m    <legend>UserProfile</legend>[m
+[32m+[m
+[32m+[m[32m    <div class="display-label">[m
+[32m+[m[32m         @Html.DisplayNameFor(model => model.UserName)[m
+[32m+[m[32m    </div>[m
+[32m+[m[32m    <div class="display-field">[m
+[32m+[m[32m        @Html.DisplayFor(model => model.UserName)[m
+[32m+[m[32m    </div>[m
+[32m+[m[32m    <div class="display-label">[m
+[32m+[m[32m         @Html.DisplayNameFor(model => model.Email)[m
+[32m+[m[32m    </div>[m
+[32m+[m[32m    <div class="display-field">[m
+[32m+[m[32m        @Html.DisplayFor(model => model.Email)[m
+[32m+[m[32m    </div>[m
+[32m+[m[32m</fieldset>[m
+[32m+[m[32m<p>[m
+[32m+[m[32m    @Html.ActionLink("Edit", "Manage") |[m
+[32m+[m[32m</p>[m
+[1mdiff --git a/FCIH_OJ/Views/Admin/DeleteUser.cshtml b/FCIH_OJ/Views/Admin/DeleteUser.cshtml[m
+[1mnew file mode 100644[m
+[1mindex 0000000..7568dd6[m
+[1m--- /dev/null[m
+[1m+++ b/FCIH_OJ/Views/Admin/DeleteUser.cshtml[m
+[36m@@ -0,0 +1,32 @@[m
+[32m+[m[32m﻿@model FCIH_OJ.Models.UserProfile[m
+[32m+[m
+[32m+[m[32m@{[m
+[32m+[m[32m    ViewBag.Title = "Delete";[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m<h2>Delete</h2>[m
+[32m+[m
+[32m+[m[32m<h3>Are you sure you want to delete this?</h3>[m
+[32m+[m[32m<fieldset>[m
+[32m+[m[32m    <legend>UserProfile</legend>[m
+[32m+[m
+[32m+[m[32m    <div class="display-label">[m
+[32m+[m[32m         @Html.DisplayNameFor(model => model.UserName)[m
+[32m+[m[32m    </div>[m
+[32m+[m[32m    <div class="display-field">[m
+[32m+[m[32m        @Html.DisplayFor(model => model.UserName)[m
+[32m+[m[32m    </div>[m
+[32m+[m[32m    <div class="display-label">[m
+[32m+[m[32m         @Html.DisplayNameFor(model => model.Email)[m
+[32m+[m[32m    </div>[m
+[32m+[m[32m    <div class="display-field">[m
+[32m+[m[32m        @Html.DisplayFor(model => model.Email)[m
+[32m+[m[32m    </div>[m
+[32m+[m[32m</fieldset>[m
+[32m+[m[32m@using (Html.BeginForm()) {[m
+[32m+[m[32m    @Html.AntiForgeryToken()[m
+[32m+[m[32m    <p>[m
+[32m+[m[32m        <input type="submit" value="DeleteUser" /> |[m
+[32m+[m[32m        @Html.ActionLink("Back to List", "ManageUsers")[m
+[32m+[m[32m    </p>[m
+[32m+[m[32m}[m
+[1mdiff --git a/FCIH_OJ/Views/Admin/EditUser.cshtml b/FCIH_OJ/Views/Admin/EditUser.cshtml[m
+[1mnew file mode 100644[m
+[1mindex 0000000..d02324e[m
+[1m--- /dev/null[m
+[1m+++ b/FCIH_OJ/Views/Admin/EditUser.cshtml[m
+[36m@@ -0,0 +1,52 @@[m
+[32m+[m[32m﻿@model FCIH_OJ.Models.AdminUserProfile[m
+[32m+[m
+[32m+[m[32m@{[m
+[32m+[m[32m    ViewBag.Title = "Edit User";[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m<h2>Edit User @Model.UserName</h2>[m
+[32m+[m
+[32m+[m[32m@using (Html.BeginForm()) {[m
+[32m+[m[32m    @Html.AntiForgeryToken()[m
+[32m+[m[32m    @Html.ValidationSummary(true)[m
+[32m+[m
+[32m+[m[32m    <fieldset>[m
+[32m+[m[32m        <legend>UserProfile</legend>[m
+[32m+[m
+[32m+[m[32m        @Html.Hidden("UserId", Model.UserId)[m
+[32m+[m[32m        @Html.Hidden("UserName", Model.UserName)[m
+[32m+[m[32m        @Html.Hidden("Email", Model.Email)[m
+[32m+[m
+[32m+[m[32m        <div class="editor-label">[m
+[32m+[m[32m            @Html.LabelFor(model => model.NewPassword)[m
+[32m+[m[32m        </div>[m
+[32m+[m[32m        <div class="editor-field">[m
+[32m+[m[32m            @Html.EditorFor(model => model.NewPassword)[m
+[32m+[m[32m            @Html.ValidationMessageFor(model => model.NewPassword)[m
+[32m+[m[32m        </div>[m
+[32m+[m[32m        <div class="editor-label">[m
+[32m+[m[32m            @Html.LabelFor(model => model.Roles)[m
+[32m+[m[32m        </div>[m
+[32m+[m[32m        <div class="editor-field">[m
+[32m+[m[32m            @{[m
+[32m+[m[32m                foreach (string role in (string[])ViewData["RolesList"])[m
+[32m+[m[32m                {[m
+[32m+[m[32m                        string ischecked = "";[m
+[32m+[m[32m                        if (Model.Roles.Contains(role))[m
+[32m+[m[32m                        {[m
+[32m+[m[32m                            ischecked = "checked";[m
+[32m+[m[32m                        }[m
+[32m+[m[32m                        <input id="Roles" name="Roles" value="@role" type="checkbox" @ischecked />[m
+[32m+[m[32m                        @role;[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m[32m        </div>[m
+[32m+[m[32m        <p>[m
+[32m+[m[32m            <input type="submit" value="Save" />[m
+[32m+[m[32m        </p>[m
+[32m+[m[32m    </fieldset>[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m<div>[m
+[32m+[m[32m    @Html.ActionLink("Cancel", "UserDetails",new { id=Model.UserId })[m
+[32m+[m[32m</div>[m
+\ No newline at end of file[m
+[1mdiff --git a/FCIH_OJ/Views/Admin/ManageUsers.cshtml b/FCIH_OJ/Views/Admin/ManageUsers.cshtml[m
+[1mnew file mode 100644[m
+[1mindex 0000000..a82c302[m
+[1m--- /dev/null[m
+[1m+++ b/FCIH_OJ/Views/Admin/ManageUsers.cshtml[m
+[36m@@ -0,0 +1,36 @@[m
+[32m+[m[32m﻿@model IEnumerable<FCIH_OJ.Models.UserProfile>[m
+[32m+[m
+[32m+[m[32m@{[m
+[32m+[m[32m    ViewBag.Title = "Manage Users";[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m<h2>Manage Users</h2>[m
+[32m+[m
+[32m+[m[32m<table>[m
+[32m+[m[32m    <tr>[m
+[32m+[m[32m        <th>[m
+[32m+[m[32m            @Html.DisplayNameFor(model => model.UserName)[m
+[32m+[m[32m        </th>[m
+[32m+[m[32m        <th>[m
+[32m+[m[32m            @Html.DisplayNameFor(model => model.Email)[m
+[32m+[m[32m        </th>[m
+[32m+[m[32m        <th></th>[m
+[32m+[m[32m    </tr>[m
+[32m+[m
+[32m+[m[32m@foreach (var item in Model) {[m
+[32m+[m[32m    <tr>[m
+[32m+[m[32m        <td>[m
+[32m+[m[32m            @Html.DisplayFor(modelItem => item.UserName)[m
+[32m+[m[32m        </td>[m
+[32m+[m[32m        <td>[m
+[32m+[m[32m            @Html.DisplayFor(modelItem => item.Email)[m
+[32m+[m[32m        </td>[m
+[32m+[m[32m        <td>[m
+[32m+[m[32m            @Html.ActionLink("Edit", "EditUser", new { id=item.UserId }) |[m
+[32m+[m[32m            @Html.ActionLink("Details", "UserDetails", new { id=item.UserId }) |[m
+[32m+[m[32m            @Html.ActionLink("Delete", "DeleteUser", new { id=item.UserId })[m
+[32m+[m[32m        </td>[m
+[32m+[m[32m    </tr>[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m</table>[m
+[1mdiff --git a/FCIH_OJ/Views/Admin/UserDetails.cshtml b/FCIH_OJ/Views/Admin/UserDetails.cshtml[m
+[1mnew file mode 100644[m
+[1mindex 0000000..2b47dfd[m
+[1m--- /dev/null[m
+[1m+++ b/FCIH_OJ/Views/Admin/UserDetails.cshtml[m
+[36m@@ -0,0 +1,35 @@[m
+[32m+[m[32m﻿@model FCIH_OJ.Models.AdminUserProfile[m
+[32m+[m
+[32m+[m[32m@{[m
+[32m+[m[32m    ViewBag.Title = "User Details";[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m<h2>User Details</h2>[m
+[32m+[m
+[32m+[m[32m<fieldset>[m
+[32m+[m[32m    <legend>User Details</legend>[m
+[32m+[m
+[32m+[m[32m    <div class="display-label">[m
+[32m+[m[32m         @Html.DisplayNameFor(model => model.UserName)[m
+[32m+[m[32m    </div>[m
+[32m+[m[32m    <div class="display-field">[m
+[32m+[m[32m        @Html.DisplayFor(model => model.UserName)[m
+[32m+[m[32m    </div>[m
+[32m+[m[32m    <div class="display-label">[m
+[32m+[m[32m         @Html.DisplayNameFor(model => model.Email)[m
+[32m+[m[32m    </div>[m
+[32m+[m[32m    <div class="display-field">[m
+[32m+[m[32m        @Html.DisplayFor(model => model.Email)[m
+[32m+[m[32m    </div>[m
+[32m+[m
+[32m+[m[32m    <div class="display-label">[m
+[32m+[m[32m         @Html.DisplayNameFor(model => model.Roles)[m
+[32m+[m[32m    </div>[m
+[32m+[m[32m    <div class="display-field">[m
+[32m+[m[32m        @Html.DisplayFor(model => model.Roles)[m
+[32m+[m[32m    </div>[m
+[32m+[m[32m</fieldset>[m
+[32m+[m[32m<p>[m
+[32m+[m[32m    @Html.ActionLink("Edit", "EditUser", new { id=Model.UserId }) |[m
+[32m+[m[32m    @Html.ActionLink("Back to List", "ManageUsers")[m
+[32m+[m[32m</p>[m
+[1mdiff --git a/FCIH_OJ/Views/Layouts/Error.cshtml b/FCIH_OJ/Views/Shared/Error.cshtml[m
+[1msimilarity index 100%[m
+[1mrename from FCIH_OJ/Views/Layouts/Error.cshtml[m
+[1mrename to FCIH_OJ/Views/Shared/Error.cshtml[m
+[1mdiff --git a/FCIH_OJ/Views/Layouts/_Layout.cshtml b/FCIH_OJ/Views/Shared/_Layout.cshtml[m
+[1msimilarity index 83%[m
+[1mrename from FCIH_OJ/Views/Layouts/_Layout.cshtml[m
+[1mrename to FCIH_OJ/Views/Shared/_Layout.cshtml[m
+[1mindex a716733..247a91f 100644[m
+[1m--- a/FCIH_OJ/Views/Layouts/_Layout.cshtml[m
+[1m+++ b/FCIH_OJ/Views/Shared/_Layout.cshtml[m
+[36m@@ -5,8 +5,8 @@[m
+         <title>@ViewBag.Title - My ASP.NET MVC Application</title>[m
+         <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />[m
+         <meta name="viewport" content="width=device-width" />[m
+[31m-        @Scripts.Render("~/Assets/js")[m
+[31m-        @Styles.Render("~/Assets/css")[m
+[32m+[m[32m        @Styles.Render("~/Content/css")[m
+[32m+[m[32m        @Scripts.Render("~/bundles/modernizr")[m
+     </head>[m
+     <body>[m
+         <header>[m
+[36m@@ -16,7 +16,7 @@[m
+                 </div>[m
+                 <div class="float-right">[m
+                     <section id="login">[m
+[31m-                        @Html.Partial("~/Views/Layouts/_LoginPartial.cshtml")[m
+[32m+[m[32m                        @Html.Partial("_LoginPartial")[m
+                     </section>[m
+                     <nav>[m
+                         <ul id="menu">[m
+[36m@@ -41,10 +41,8 @@[m
+                 </div>[m
+             </div>[m
+         </footer>[m
+[31m-        <!--[m
+[31m-            my custom js files[m
+[31m-            Scripts.Render("~/bundles/jquery")[m
+[31m-            RenderSection("scripts", required: false)[m
+[31m-         -->[m
+[32m+[m
+[32m+[m[32m        @Scripts.Render("~/bundles/jquery")[m
+[32m+[m[32m        @RenderSection("scripts", required: false)[m
+     </body>[m
+ </html>[m
+[1mdiff --git a/FCIH_OJ/Views/Layouts/_LoginPartial.cshtml b/FCIH_OJ/Views/Shared/_LoginPartial.cshtml[m
+[1msimilarity index 78%[m
+[1mrename from FCIH_OJ/Views/Layouts/_LoginPartial.cshtml[m
+[1mrename to FCIH_OJ/Views/Shared/_LoginPartial.cshtml[m
+[1mindex 75ab330..ab42c49 100644[m
+[1m--- a/FCIH_OJ/Views/Layouts/_LoginPartial.cshtml[m
+[1m+++ b/FCIH_OJ/Views/Shared/_LoginPartial.cshtml[m
+[36m@@ -1,6 +1,6 @@[m
+ ﻿@if (Request.IsAuthenticated) {[m
+     <text>[m
+[31m-        Hello, @Html.ActionLink(User.Identity.Name, "Manage", "Account", routeValues: null, htmlAttributes: new { @class = "username", title = "Manage" })![m
+[32m+[m[32m        Hello, @Html.ActionLink(User.Identity.Name, "View", "Account", routeValues: null, htmlAttributes: new { @class = "username", title = "Profile" })![m
+         @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm" })) {[m
+             @Html.AntiForgeryToken()[m
+             <a href="javascript:document.getElementById('logoutForm').submit()">Log off</a>[m
+[1mdiff --git a/FCIH_OJ/Views/User/Manage.cshtml b/FCIH_OJ/Views/User/Manage.cshtml[m
+[1mdeleted file mode 100644[m
+[1mindex 52ea001..0000000[m
+[1m--- a/FCIH_OJ/Views/User/Manage.cshtml[m
+[1m+++ /dev/null[m
+[36m@@ -1,32 +0,0 @@[m
+[31m-﻿@model FCIH_OJ.Models.LocalPasswordModel[m
+[31m-@{[m
+[31m-    ViewBag.Title = "Manage Account";[m
+[31m-}[m
+[31m-[m
+[31m-<hgroup class="title">[m
+[31m-    <h1>@ViewBag.Title.</h1>[m
+[31m-</hgroup>[m
+[31m-[m
+[31m-<p class="message-success">@ViewBag.StatusMessage</p>[m
+[31m-[m
+[31m-<p>You're logged in as <strong>@User.Identity.Name</strong>.</p>[m
+[31m-[m
+[31m-@if (ViewBag.HasLocalPassword)[m
+[31m-{[m
+[31m-    @Html.Partial("_ChangePasswordPartial")[m
+[31m-}[m
+[31m-else[m
+[31m-{ [m
+[31m-    @Html.Partial("_SetPasswordPartial")[m
+[31m-}[m
+[31m-[m
+[31m-<section id="externalLogins">[m
+[31m-    @Html.Action("RemoveExternalLogins")[m
+[31m-[m
+[31m-    <h3>Add an external login</h3>[m
+[31m-    @Html.Action("ExternalLoginsList", new { ReturnUrl = ViewBag.ReturnUrl })[m
+[31m-</section>[m
+[31m-[m
+[31m-@section Scripts {[m
+[31m-    @Scripts.Render("~/bundles/jqueryval")[m
+[31m-}[m
+[1mdiff --git a/FCIH_OJ/Views/User/_SetPasswordPartial.cshtml b/FCIH_OJ/Views/User/_SetPasswordPartial.cshtml[m
+[1mdeleted file mode 100644[m
+[1mindex 46533f5..0000000[m
+[1m--- a/FCIH_OJ/Views/User/_SetPasswordPartial.cshtml[m
+[1m+++ /dev/null[m
+[36m@@ -1,26 +0,0 @@[m
+[31m-﻿@model FCIH_OJ.Models.LocalPasswordModel[m
+[31m-[m
+[31m-<p>[m
+[31m-    You do not have a local password for this site. Add a local[m
+[31m-    password so you can log in without an external login.[m
+[31m-</p>[m
+[31m-[m
+[31m-@using (Html.BeginForm("Manage", "Account")) {[m
+[31m-    @Html.AntiForgeryToken()[m
+[31m-    @Html.ValidationSummary()[m
+[31m-[m
+[31m-    <fieldset>[m
+[31m-        <legend>Set Password Form</legend>[m
+[31m-        <ol>[m
+[31m-            <li>[m
+[31m-                @Html.LabelFor(m => m.NewPassword)[m
+[31m-                @Html.PasswordFor(m => m.NewPassword)[m
+[31m-            </li>[m
+[31m-            <li>[m
+[31m-                @Html.LabelFor(m => m.ConfirmPassword)[m
+[31m-                @Html.PasswordFor(m => m.ConfirmPassword)[m
+[31m-            </li>[m
+[31m-        </ol>[m
+[31m-        <input type="submit" value="Set password" />[m
+[31m-    </fieldset>[m
+[31m-}[m
+[1mdiff --git a/FCIH_OJ/Views/_ViewStart.cshtml b/FCIH_OJ/Views/_ViewStart.cshtml[m
+[1mindex adcb41a..efda124 100644[m
+[1m--- a/FCIH_OJ/Views/_ViewStart.cshtml[m
+[1m+++ b/FCIH_OJ/Views/_ViewStart.cshtml[m
+[36m@@ -1,3 +1,3 @@[m
+ ﻿@{[m
+[31m-    Layout = "~/Views/Layouts/_Layout.cshtml";[m
+[32m+[m[32m    Layout = "~/Views/Shared/_Layout.cshtml";[m
+ }[m
+\ No newline at end of file[m
+[1mdiff --git a/FCIH_OJ/Web.config b/FCIH_OJ/Web.config[m
+[1mindex cc3dd9a..acda798 100644[m
+[1m--- a/FCIH_OJ/Web.config[m
+[1m+++ b/FCIH_OJ/Web.config[m
+[36m@@ -24,6 +24,18 @@[m
+     <authentication mode="Forms">[m
+       <forms loginUrl="~/Account/Login" timeout="2880" />[m
+     </authentication>[m
+[32m+[m[32m    <roleManager enabled="true" defaultProvider="SimpleRoleProvider">[m
+[32m+[m[32m      <providers>[m
+[32m+[m[32m        <clear />[m
+[32m+[m[32m        <add name="SimpleRoleProvider" type="WebMatrix.WebData.SimpleRoleProvider, WebMatrix.WebData" />[m
+[32m+[m[32m      </providers>[m
+[32m+[m[32m    </roleManager>[m
+[32m+[m[32m    <membership defaultProvider="SimpleMembershipProvider">[m
+[32m+[m[32m      <providers>[m
+[32m+[m[32m        <clear />[m
+[32m+[m[32m        <add name="SimpleMembershipProvider" type="WebMatrix.WebData.SimpleMembershipProvider, WebMatrix.WebData" />[m
+[32m+[m[32m      </providers>[m
+[32m+[m[32m    </membership>[m
+     <pages>[m
+       <namespaces>[m
+         <add namespace="System.Web.Helpers" />[m
+[36m@@ -38,7 +50,14 @@[m
+   </system.web>[m
+   <system.webServer>[m
+     <validation validateIntegratedModeConfiguration="false" />[m
+[31m-  </system.webServer>[m
+[32m+[m[32m  <handlers>[m
+[32m+[m[32m      <remove name="ExtensionlessUrlHandler-ISAPI-4.0_32bit" />[m
+[32m+[m[32m      <remove name="ExtensionlessUrlHandler-ISAPI-4.0_64bit" />[m
+[32m+[m[32m      <remove name="ExtensionlessUrlHandler-Integrated-4.0" />[m
+[32m+[m[32m      <add name="ExtensionlessUrlHandler-ISAPI-4.0_32bit" path="*." verb="GET,HEAD,POST,DEBUG,PUT,DELETE,PATCH,OPTIONS" modules="IsapiModule" scriptProcessor="%windir%\Microsoft.NET\Framework\v4.0.30319\aspnet_isapi.dll" preCondition="classicMode,runtimeVersionv4.0,bitness32" responseBufferLimit="0" />[m
+[32m+[m[32m      <add name="ExtensionlessUrlHandler-ISAPI-4.0_64bit" path="*." verb="GET,HEAD,POST,DEBUG,PUT,DELETE,PATCH,OPTIONS" modules="IsapiModule" scriptProcessor="%windir%\Microsoft.NET\Framework64\v4.0.30319\aspnet_isapi.dll" preCondition="classicMode,runtimeVersionv4.0,bitness64" responseBufferLimit="0" />[m
+[32m+[m[32m      <add name="ExtensionlessUrlHandler-Integrated-4.0" path="*." verb="GET,HEAD,POST,DEBUG,PUT,DELETE,PATCH,OPTIONS" type="System.Web.Handlers.TransferRequestHandler" preCondition="integratedMode,runtimeVersionv4.0" />[m
+[32m+[m[32m    </handlers></system.webServer>[m
+   <runtime>[m
+     <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">[m
+       <dependentAssembly>[m
+[1mdiff --git a/FCIH_OJ/packages.config b/FCIH_OJ/packages.config[m
+[1mindex ad253ee..7fd81b2 100644[m
+[1m--- a/FCIH_OJ/packages.config[m
+[1m+++ b/FCIH_OJ/packages.config[m
+[36m@@ -1,11 +1,35 @@[m
+ ﻿<?xml version="1.0" encoding="utf-8"?>[m
+ <packages>[m
+[32m+[m[32m  <package id="DotNetOpenAuth.AspNet" version="4.1.4.12333" targetFramework="net45" />[m
+[32m+[m[32m  <package id="DotNetOpenAuth.Core" version="4.1.4.12333" targetFramework="net45" />[m
+[32m+[m[32m  <package id="DotNetOpenAuth.OAuth.Consumer" version="4.1.4.12333" targetFramework="net45" />[m
+[32m+[m[32m  <package id="DotNetOpenAuth.OAuth.Core" version="4.1.4.12333" targetFramework="net45" />[m
+[32m+[m[32m  <package id="DotNetOpenAuth.OpenId.Core" version="4.1.4.12333" targetFramework="net45" />[m
+[32m+[m[32m  <package id="DotNetOpenAuth.OpenId.RelyingParty" version="4.1.4.12333" targetFramework="net45" />[m
+   <package id="EntityFramework" version="5.0.0" targetFramework="net45" />[m
+[32m+[m[32m  <package id="jQuery" version="1.8.2" targetFramework="net45" />[m
+[32m+[m[32m  <package id="jQuery.Validation" version="1.10.0" targetFramework="net45" />[m
+[32m+[m[32m  <package id="knockoutjs" version="2.2.0" targetFramework="net45" />[m
+   <package id="Microsoft.AspNet.Mvc" version="4.0.20710.0" targetFramework="net45" />[m
+   <package id="Microsoft.AspNet.Mvc.FixedDisplayModes" version="1.0.0" targetFramework="net45" />[m
+   <package id="Microsoft.AspNet.Razor" version="2.0.20715.0" targetFramework="net45" />[m
+   <package id="Microsoft.AspNet.Web.Optimization" version="1.0.0" targetFramework="net45" />[m
+[32m+[m[32m  <package id="Microsoft.AspNet.WebApi" version="4.0.20710.0" targetFramework="net45" />[m
+[32m+[m[32m  <package id="Microsoft.AspNet.WebApi.Client" version="4.0.20710.0" targetFramework="net45" />[m
+[32m+[m[32m  <package id="Microsoft.AspNet.WebApi.Core" version="4.0.20710.0" targetFramework="net45" />[m
+[32m+[m[32m  <package id="Microsoft.AspNet.WebApi.OData" version="4.0.0" targetFramework="net45" />[m
+[32m+[m[32m  <package id="Microsoft.AspNet.WebApi.WebHost" version="4.0.20710.0" targetFramework="net45" />[m
+   <package id="Microsoft.AspNet.WebPages" version="2.0.20710.0" targetFramework="net45" />[m
+[32m+[m[32m  <package id="Microsoft.AspNet.WebPages.Data" version="2.0.20710.0" targetFramework="net45" />[m
+[32m+[m[32m  <package id="Microsoft.AspNet.WebPages.OAuth" version="2.0.20710.0" targetFramework="net45" />[m
+[32m+[m[32m  <package id="Microsoft.AspNet.WebPages.WebData" version="2.0.20710.0" targetFramework="net45" />[m
+[32m+[m[32m  <package id="Microsoft.Data.Edm" version="5.2.0" targetFramework="net45" />[m
+[32m+[m[32m  <package id="Microsoft.Data.OData" version="5.2.0" targetFramework="net45" />[m
+[32m+[m[32m  <package id="Microsoft.jQuery.Unobtrusive.Ajax" version="2.0.30116.0" targetFramework="net45" />[m
+[32m+[m[32m  <package id="Microsoft.jQuery.Unobtrusive.Validation" version="2.0.30116.0" targetFramework="net45" />[m
+[32m+[m[32m  <package id="Microsoft.Net.Http" version="2.0.20710.0" targetFramework="net45" />[m
+   <package id="Microsoft.Web.Infrastructure" version="1.0.0.0" targetFramework="net45" />[m
+[32m+[m[32m  <package id="Newtonsoft.Json" version="4.5.11" targetFramework="net45" />[m
+[32m+[m[32m  <package id="System.Spatial" version="5.2.0" targetFramework="net45" />[m
+   <package id="WebGrease" version="1.3.0" targetFramework="net45" />[m
+ </packages>[m
+\ No newline at end of file[m
+[1mdiff --git a/README.md b/README.md[m
+[1mindex 78430dd..b0558cc 100644[m
+[1m--- a/README.md[m
+[1m+++ b/README.md[m
+[36m@@ -1,2 +1,2 @@[m
+ # FCIH-OJ[m
+[31m-FCIH Online Judgement Graduate Project[m
+[32m+[m[32mFCIH Online Judgement Graduate Project[m
+\ No newline at end of file[m

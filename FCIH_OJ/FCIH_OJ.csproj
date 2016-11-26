@@ -7,7 +7,7 @@
     <ProductVersion>
     </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{BB4286A7-056B-467E-B3B2-E9FE94095360}</ProjectGuid>
+    <ProjectGuid>{6BBB2E1E-1C25-4B91-8F19-DC6FC95F5C1E}</ProjectGuid>
     <ProjectTypeGuids>{E3E379DF-F4C6-4180-9B81-6769533ABE47};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -20,6 +20,8 @@
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -114,6 +116,14 @@
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Common\InitializeData.cs" />
+    <Compile Include="Controllers\contestCController.cs" />
+    <Compile Include="Controllers\problemController.cs" />
+    <Compile Include="Controllers\problemWithTestcasesController.cs" />
+    <Compile Include="Controllers\test\testDifficultiesController.cs" />
+    <Compile Include="Controllers\test\testProblemController.cs" />
+    <Compile Include="Controllers\test\testPropTypesController.cs" />
+    <Compile Include="Controllers\test\testTestCaseController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Global.asax.cs">
@@ -124,15 +134,27 @@
       <DependentUpon>201611022321289_Initial.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\contestAndProblem\contest.cs" />
+    <Compile Include="Models\contestAndProblem\contestAndProblemContext.cs" />
+    <Compile Include="Models\contestAndProblem\problem.cs" />
+    <Compile Include="Models\contestAndProblem\problemDifficulty.cs" />
+    <Compile Include="Models\contestAndProblem\problemType.cs" />
+    <Compile Include="Models\contestAndProblem\problemWithTestcases.cs" />
+    <Compile Include="Models\contestAndProblem\testCase.cs" />
     <Compile Include="Models\UserModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\css\general.css" />
     <Content Include="Assets\js\general.js" />
+    <Content Include="Assets\js\jquery-1.8.2.min.js" />
+    <Content Include="Assets\js\jquery-3.1.1.js" />
+    <Content Include="Assets\js\jquery.unobtrusive-ajax.min.js" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -154,7 +176,6 @@
     <Content Include="Views\Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="App_Data\" />
     <Folder Include="Assets\images\" />
   </ItemGroup>
   <ItemGroup>
@@ -167,6 +188,102 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ClassDiagram1.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\contestC\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\contestC\Details.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\contestC\Create.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\contestC\Edit.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\contestC\Delete.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\problemWithTestcases\create.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testTestCase\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testTestCase\Details.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testTestCase\Create.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testTestCase\Edit.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testTestCase\Delete.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testDifficulties\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testDifficulties\Details.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testDifficulties\Create.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testDifficulties\Edit.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testDifficulties\Delete.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testPropTypes\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testPropTypes\Details.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testPropTypes\Create.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testPropTypes\Edit.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testPropTypes\Delete.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testProblem\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testProblem\Details.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testProblem\Create.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testProblem\Edit.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\testProblem\Delete.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\problem\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\problem\Details.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\problem\Create.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\problem\Edit.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\problem\Delete.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\problem\_editTestCase.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -196,6 +313,13 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

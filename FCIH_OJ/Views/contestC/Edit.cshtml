@@ -1,0 +1,52 @@
+﻿@model FCIH_OJ.Models.contest
+
+@{
+    ViewBag.Title = "Edit";
+}
+
+<h2>Edit</h2>
+
+@using (Html.BeginForm()) {
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>contest</legend>
+
+        @Html.HiddenFor(model => model.Id)
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Name)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.Name)
+            @Html.ValidationMessageFor(model => model.Name)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.date)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.date)
+            @Html.ValidationMessageFor(model => model.date)
+        </div>
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.numOfProblems)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.numOfProblems)
+            @Html.ValidationMessageFor(model => model.numOfProblems)
+        </div>
+
+        <p>
+            <input type="submit" value="Save" />
+        </p>
+    </fieldset>
+}
+
+     @Html.Action("contestProblems", "problem" , new {contestId=Model.Id })
+<br />
+<div>
+    @Html.ActionLink("Back to contests", "Index")
+</div>
