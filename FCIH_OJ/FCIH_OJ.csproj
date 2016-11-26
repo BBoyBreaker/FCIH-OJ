@@ -188,7 +188,6 @@
     <Compile Include="Controllers\test\testProblemController.cs" />
     <Compile Include="Controllers\test\testPropTypesController.cs" />
     <Compile Include="Controllers\test\testTestCaseController.cs" />
-    <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
@@ -211,7 +210,6 @@
     <Compile Include="Models\contestAndProblem\problemType.cs" />
     <Compile Include="Models\contestAndProblem\problemWithTestcases.cs" />
     <Compile Include="Models\contestAndProblem\testCase.cs" />
-    <Compile Include="Models\UserModels.cs" />
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Validations\Validations.cs" />
