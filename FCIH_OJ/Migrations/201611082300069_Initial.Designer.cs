@@ -11,7 +11,7 @@ namespace FCIH_OJ.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201611022321289_Initial"; }
+            get { return "201611082300069_Initial"; }
         }
         
         string IMigrationMetadata.Source

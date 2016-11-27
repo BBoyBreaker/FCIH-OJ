@@ -1,16 +1,22 @@
-﻿@model FCIH_OJ.Models.LocalPasswordModel
+﻿@model FCIH_OJ.Models.EditProfileModel
+@{
+    ViewBag.Title = "Manage Account";
+}
 
-<p>
-    You do not have a local password for this site. Add a local
-    password so you can log in without an external login.
-</p>
+<hgroup class="title">
+    <h1>@ViewBag.Title.</h1>
+</hgroup>
+
+<p class="message-success">@ViewBag.StatusMessage</p>
+
+<p>You're logged in as <strong>@User.Identity.Name</strong>.</p>
 
 @using (Html.BeginForm("Manage", "Account")) {
     @Html.AntiForgeryToken()
     @Html.ValidationSummary()
-
+    
     <fieldset>
-        <legend>Set Password Form</legend>
+        <legend>Edit Profile</legend>
         <ol>
             <li>
                 @Html.LabelFor(m => m.NewPassword)
@@ -21,6 +27,6 @@
                 @Html.PasswordFor(m => m.ConfirmPassword)
             </li>
         </ol>
-        <input type="submit" value="Set password" />
+        <input type="submit" value="Save" />
     </fieldset>
 }

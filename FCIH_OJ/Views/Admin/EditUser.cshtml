@@ -1,0 +1,52 @@
+﻿@model FCIH_OJ.Models.AdminUserProfile
+
+@{
+    ViewBag.Title = "Edit User";
+}
+
+<h2>Edit User @Model.UserName</h2>
+
+@using (Html.BeginForm()) {
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>UserProfile</legend>
+
+        @Html.Hidden("UserId", Model.UserId)
+        @Html.Hidden("UserName", Model.UserName)
+        @Html.Hidden("Email", Model.Email)
+
+        <div class="editor-label">
+            @Html.LabelFor(model => model.NewPassword)
+        </div>
+        <div class="editor-field">
+            @Html.EditorFor(model => model.NewPassword)
+            @Html.ValidationMessageFor(model => model.NewPassword)
+        </div>
+        <div class="editor-label">
+            @Html.LabelFor(model => model.Roles)
+        </div>
+        <div class="editor-field">
+            @{
+                foreach (string role in (string[])ViewData["RolesList"])
+                {
+                        string ischecked = "";
+                        if (Model.Roles.Contains(role))
+                        {
+                            ischecked = "checked";
+                        }
+                        <input id="Roles" name="Roles" value="@role" type="checkbox" @ischecked />
+                        @role;
+                }
+            }
+        </div>
+        <p>
+            <input type="submit" value="Save" />
+        </p>
+    </fieldset>
+}
+
+<div>
+    @Html.ActionLink("Cancel", "UserDetails",new { id=Model.UserId })
+</div>

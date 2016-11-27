@@ -5,8 +5,8 @@
         <title>@ViewBag.Title - My ASP.NET MVC Application</title>
         <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
         <meta name="viewport" content="width=device-width" />
-        @Scripts.Render("~/Assets/js")
-        @Styles.Render("~/Assets/css")
+        @Styles.Render("~/Content/css")
+        @Scripts.Render("~/bundles/modernizr")
     </head>
     <body>
         <header>
@@ -16,7 +16,7 @@
                 </div>
                 <div class="float-right">
                     <section id="login">
-                        @Html.Partial("~/Views/Layouts/_LoginPartial.cshtml")
+                        @Html.Partial("_LoginPartial")
                     </section>
                     <nav>
                         <ul id="menu">
@@ -41,10 +41,8 @@
                 </div>
             </div>
         </footer>
-        <!--
-            my custom js files
-            Scripts.Render("~/bundles/jquery")
-            RenderSection("scripts", required: false)
-         -->
+
+        @Scripts.Render("~/bundles/jquery")
+        @RenderSection("scripts", required: false)
     </body>
 </html>
