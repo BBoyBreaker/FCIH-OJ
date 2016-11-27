@@ -35,9 +35,6 @@ namespace FCIH_OJ
         {
             public SimpleMembershipInitializer()
             {
-                using (var context = new UsersContext())
-                    context.UserProfiles.Find(1);
-
                 if (!WebSecurity.Initialized)
                     WebSecurity.InitializeDatabaseConnection("DefaultConnection", "UserProfile", "UserId", "UserName", autoCreateTables: true);
             }
