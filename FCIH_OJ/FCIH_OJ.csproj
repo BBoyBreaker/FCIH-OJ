@@ -183,7 +183,6 @@
     <Compile Include="Common\InitializeData.cs" />
     <Compile Include="Controllers\contestCController.cs" />
     <Compile Include="Controllers\problemController.cs" />
-    <Compile Include="Controllers\problemWithTestcasesController.cs" />
     <Compile Include="Controllers\test\testDifficultiesController.cs" />
     <Compile Include="Controllers\test\testProblemController.cs" />
     <Compile Include="Controllers\test\testPropTypesController.cs" />
@@ -208,7 +207,6 @@
     <Compile Include="Models\contestAndProblem\problem.cs" />
     <Compile Include="Models\contestAndProblem\problemDifficulty.cs" />
     <Compile Include="Models\contestAndProblem\problemType.cs" />
-    <Compile Include="Models\contestAndProblem\problemWithTestcases.cs" />
     <Compile Include="Models\contestAndProblem\testCase.cs" />
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -294,69 +292,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\contestC\Delete.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\problemWithTestcases\create.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testTestCase\Index.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testTestCase\Details.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testTestCase\Create.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testTestCase\Edit.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testTestCase\Delete.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testDifficulties\Index.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testDifficulties\Details.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testDifficulties\Create.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testDifficulties\Edit.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testDifficulties\Delete.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testPropTypes\Index.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testPropTypes\Details.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testPropTypes\Create.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testPropTypes\Edit.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testPropTypes\Delete.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testProblem\Index.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testProblem\Details.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testProblem\Create.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testProblem\Edit.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\testProblem\Delete.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\problem\Index.cshtml" />
